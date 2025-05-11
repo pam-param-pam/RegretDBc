@@ -1,0 +1,13 @@
+#include "DeleteAST.h"
+
+
+DeleteAST::DeleteAST(Identifier  table, std::string  where_expr)
+        : table(std::move(table)), where_expr(std::move(where_expr)) {}
+
+void DeleteAST::performChecks() {
+
+}
+
+std::string DeleteAST::repr() const {
+    return "DeleteStmt(table=" + table.value + ", where=" + where_expr + ")";
+}
