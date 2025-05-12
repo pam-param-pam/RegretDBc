@@ -24,6 +24,10 @@ public:
     void addColumnTypes(const std::string& table_name, const TypeHints::ColumnTypeMap& col_types);
     void dropTable(const std::string& table_name);
 
+    void printTable(TypeHints::TableData data);
+
+    void setTablesData(const std::string &table_name, const TypeHints::TableData &newData);
+
 private:
     DataManager() = default;
 

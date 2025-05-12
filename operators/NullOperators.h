@@ -2,6 +2,7 @@
 
 #include <string>
 #include <optional>
+#include <functional>
 #include "../TypeHints.h"
 #include "../tokenTypes/Literal.h"
 #include "../exceptions/exceptions.h"
@@ -17,11 +18,12 @@ public:
 
     [[nodiscard]] std::optional<bool> evaluate(const Row& row) const;
     [[nodiscard]] std::string toString() const;
+    void visitColumns(const std::function<void(std::string&, const std::optional<Literal>&)>& visitor);
 
 protected:
     std::string columnName;
 
-    [[nodiscard]] std::optional<Value> resolve(const Row& row) const;
+    [[nodiscard]] Value resolve(const Row& row) const;
     [[nodiscard]] virtual bool isNullCheck() const = 0;
 };
 

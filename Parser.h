@@ -26,8 +26,8 @@ public:
 private:
     SelectAST parseSelect();
     InsertAST parseInsert();
-    UpdateAST parse_update();
-    DeleteAST parse_delete();
+    UpdateAST parseUpdate();
+    DeleteAST parseDelete();
     CreateAST parseCreate();
     DropAST parse_drop();
 //    AlterStmt parse_alter();
@@ -65,13 +65,13 @@ private:
 
     std::vector<std::pair<Identifier, std::string>> parseOrderBy();
 
-    std::shared_ptr<Operand> parseExpression();
+    Operand parseExpression();
 
-    std::shared_ptr<Operand> parseOr();
+    Operand parseOr();
 
-    std::shared_ptr<Operand> parseAnd();
+    Operand parseAnd();
 
-    std::shared_ptr<Operand> parseNot();
+    Operand parseNot();
 
-    std::shared_ptr<Operand> parseComparison();
+    Operand parseComparison();
 };

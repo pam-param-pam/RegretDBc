@@ -13,9 +13,15 @@ std::optional<bool> AND::evaluate(const TypeHints::Row& row) const {
     return std::nullopt; // If either operand cannot be evaluated, return nullopt
 }
 
+
+void AND::visitColumns(const std::function<void(std::string &, const std::optional<Literal> &)> &visitor) const {
+    leftOperand->visitColumns(visitor);
+    rightOperand->visitColumns(visitor);
+}
 std::string AND::toString() const {
     return "AND(" + leftOperand->toString() + ", " + rightOperand->toString() + ")";
 }
+
 
 // OR implementation
 OR::OR(std::shared_ptr<Operand> left, std::shared_ptr<Operand> right)
@@ -29,6 +35,11 @@ std::optional<bool> OR::evaluate(const TypeHints::Row& row) const {
         return leftEval.value() || rightEval.value();
     }
     return std::nullopt; // If either operand cannot be evaluated, return nullopt
+}
+
+void OR::visitColumns(const std::function<void(std::string &, const std::optional<Literal> &)> &visitor) const {
+    leftOperand->visitColumns(visitor);
+    rightOperand->visitColumns(visitor);
 }
 
 std::string OR::toString() const {
@@ -46,6 +57,10 @@ std::optional<bool> NOT::evaluate(const TypeHints::Row& row) const {
         return !operandEval.value();
     }
     return std::nullopt; // If operand cannot be evaluated, return nullopt
+}
+
+void NOT::visitColumns(const std::function<void(std::string &, const std::optional<Literal> &)> &visitor) const {
+    operand->visitColumns(visitor);
 }
 
 std::string NOT::toString() const {

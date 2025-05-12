@@ -1,4 +1,5 @@
 #include "DataManager.h"
+#include "fmt/base.h"
 
 DataManager& DataManager::getInstance() {
     static DataManager instance;
@@ -42,4 +43,34 @@ void DataManager::addColumnTypes(const std::string& table_name, const TypeHints:
 void DataManager::dropTable(const std::string& table_name) {
     tableData.erase(table_name);
     columnTypes.erase(table_name);
+}
+void DataManager::setTablesData(const std::string& table_name, const TypeHints::TableData& newData) {
+    tableData[table_name] = newData;
+}
+void DataManager::printTable(TypeHints::TableData data) {
+    fmt::println("Printing project data ({} rows):", data.size());
+
+    for (size_t rowIdx = 0; rowIdx < data.size(); ++rowIdx) {
+        const auto& row = data[rowIdx];
+        fmt::print("Row {}:\n", rowIdx);
+
+        for (const auto& [key, val] : row) {
+            Literal::Type type;
+
+            if (std::holds_alternative<std::monostate>(val)) {
+                type = Literal::Type::NULL_VALUE;
+            } else if (std::holds_alternative<std::string>(val)) {
+                type = Literal::Type::TEXT;
+            } else if (std::holds_alternative<int>(val)) {
+                type = Literal::Type::INTEGER;
+            } else if (std::holds_alternative<bool>(val)) {
+                type = Literal::Type::BOOLEAN;
+            } else {
+                throw std::runtime_error("Unsupported variant type");
+            }
+
+            Literal lit(type, val);
+            fmt::print("  {} = {}\n", key, lit.toString());
+        }
+    }
 }

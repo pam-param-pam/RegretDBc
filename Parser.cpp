@@ -66,44 +66,46 @@ std::unique_ptr<ASTNode> Parser::parse(const std::string &sql_stmt) {
     pos = 0;
     sql = sql_stmt;
     try {
-    // Tokenize the SQL statement
-    tokens = tokenizer.tokenize(sql_stmt);
+        // Tokenize the SQL statement
+        tokens = tokenizer.tokenize(sql_stmt);
+        std::unique_ptr<ASTNode> ptr;
 
-    // Check for SQL statement type
-    Token token = peek();
-    if (token.type == "CREATE") {
-        CreateAST stmt = parseCreate();
-        auto ptr = std::make_unique<CreateAST>(std::move(stmt));
-        return ptr;
-    } else if (token.type == "INSERT") {
-        InsertAST stmt = parseInsert();
-        auto ptr = std::make_unique<InsertAST>(std::move(stmt));
-        return ptr;
-    } else if (token.type == "SELECT") {
-        SelectAST stmt = parseSelect();
-//    } else if (token.type == "UPDATE") {
-//        UpdateStmt stmt = parse_update();
-//        fmt::print(stmt.repr());
-//    } else if (token.type == "DELETE") {
-//        DeleteStmt stmt = parse_delete();
-//        fmt::print(stmt.repr());
-//    } else if (token.type == "DROP") {
+        // Check for SQL statement type
+        Token token = peek();
+        if (token.type == "CREATE") {
+            CreateAST stmt = parseCreate();
+            ptr = std::make_unique<CreateAST>(std::move(stmt));
+        } else if (token.type == "INSERT") {
+            InsertAST stmt = parseInsert();
+            ptr = std::make_unique<InsertAST>(std::move(stmt));
+        } else if (token.type == "SELECT") {
+            SelectAST stmt = parseSelect();
+            ptr = std::make_unique<SelectAST>(std::move(stmt));
+        } else if (token.type == "DELETE") {
+            DeleteAST stmt = parseDelete();
+            ptr = std::make_unique<DeleteAST>(std::move(stmt));
+        } else if (token.type == "UPDATE") {
+            UpdateAST stmt = parseUpdate();
+            ptr = std::make_unique<UpdateAST>(std::move(stmt));
+//        } else if (token.type == "DROP") {
 //        DropStmt stmt = parse_drop();
-        fmt::print(stmt.repr());
 //    } else if (token.type == "ALTER") {
 //        return parse_alter();
-    } else {
-        throw SQLSyntaxError("Unknown statement start: " + token.value);
-    }
+        } else {
+            throw SQLSyntaxError("Unknown statement start: " + token.value);
+        }
 
-    // Check for leftover tokens
-    if (peek().type != "EOF") {
-        throw SQLSyntaxError("Unexpected token after end of statement: " + peek().value);
-    }
-    } catch (SQLSyntaxError& e) {
+        // Check for leftover tokens
+        if (peek().type != "EOF") {
+            throw SQLSyntaxError("Unexpected token after end of statement: " + peek().value);
+        }
+
+        return ptr;
+    } catch (SQLSyntaxError &e) {
         e.setMessage(e.getMessage() + "\n" + e.getPrettyError(sql_stmt, tokens, pos));
         throw e;
     }
+
 }
 
 Literal Parser::parseLiteral() {
@@ -118,6 +120,9 @@ Literal Parser::parseLiteral() {
     } else if (token.type == "TEXT") {
         advance();
         return {Literal::Type::TEXT, token.value};
+    } else if (token.type == "NULL") {
+        advance();
+        return {Literal::Type::NULL_VALUE, std::monostate{}};
     } else {
         throw SQLSyntaxError("Expected literal value, found " + token.toString());
     }
@@ -211,8 +216,8 @@ std::vector<std::pair<Identifier, Literal>> Parser::parseAssignments() {
     }
     return assignments;
 }
+
 std::vector<std::pair<Identifier, std::string>> Parser::parseOrderBy() {
-    expect("ORDER");
     expect("BY");
 
     std::vector<std::pair<Identifier, std::string>> orderings;
@@ -221,11 +226,11 @@ std::vector<std::pair<Identifier, std::string>> Parser::parseOrderBy() {
         Identifier column = parseColumn();
 
         Token directionToken = peek();
-        if (directionToken.value != "ASC" && directionToken.value != "DESC") {
+        if (directionToken.type != "ASC" && directionToken.type != "DESC") {
             throw SQLSyntaxError("Expected 'ASC' or 'DESC', found '" + directionToken.type + "'");
         }
 
-        std::string direction = directionToken.value;
+        std::string direction = directionToken.type;
         advance();
 
         orderings.emplace_back(column, direction);
@@ -237,42 +242,44 @@ std::vector<std::pair<Identifier, std::string>> Parser::parseOrderBy() {
     }
     return orderings;
 }
-std::shared_ptr<Operand> Parser::parseExpression() {
-    return parseOr();  // Lowest precedence
+
+Operand Parser::parseExpression() {
+    return parseOr(); // Lowest precedence
 }
 
-std::shared_ptr<Operand> Parser::parseOr() {
-    auto left = parseAnd();
+Operand Parser::parseOr() {
+    Operand left = parseAnd();
     while (peek().type == "OR") {
         advance();
-        auto right = parseAnd();
-        left = std::make_shared<Operand>(std::make_shared<OR>(left, right));
+        Operand right = parseAnd();
+        left = Operand(std::make_shared<OR>(std::make_shared<Operand>(left), std::make_shared<Operand>(right)));
     }
     return left;
 }
 
-std::shared_ptr<Operand> Parser::parseAnd() {
-    auto left = parseNot();
+Operand Parser::parseAnd() {
+    Operand left = parseNot();
     while (peek().type == "AND") {
         advance();
-        auto right = parseNot();
-        left = std::make_shared<Operand>(std::make_shared<AND>(left, right));
+        Operand right = parseNot();
+        left = Operand(std::make_shared<AND>(std::make_shared<Operand>(left), std::make_shared<Operand>(right)));
     }
     return left;
 }
 
-std::shared_ptr<Operand> Parser::parseNot() {
+Operand Parser::parseNot() {
     if (peek().type == "NOT") {
         advance();
-        auto operand = parseNot();
-        return std::make_shared<Operand>(std::make_shared<NOT>(operand));
+        Operand operand = parseNot();
+        return Operand(std::make_shared<NOT>(std::make_shared<Operand>(operand)));
     }
     return parseComparison();
 }
-std::shared_ptr<Operand> Parser::parseComparison() {
+
+Operand Parser::parseComparison() {
     if (peek().type == "LPAREN") {
         advance();
-        auto expr = parseExpression();
+        Operand expr = parseExpression();
         expect("RPAREN");
         return expr;
     }
@@ -282,7 +289,7 @@ std::shared_ptr<Operand> Parser::parseComparison() {
     if (token.type == "BOOLEAN") {
         advance();
         bool value = parse_boolean(token.value);
-        return std::make_shared<Operand>(value);
+        return Operand(value);
     }
 
     Identifier left = parseColumn();
@@ -293,12 +300,10 @@ std::shared_ptr<Operand> Parser::parseComparison() {
         if (peek().type == "NOT") {
             advance();
             expect("NULL");
-            auto check = std::make_shared<ISNOTNULL>(left.value);
-            return std::make_shared<Operand>(check);
+            return Operand(std::make_shared<ISNOTNULL>(left.value));
         } else {
             expect("NULL");
-            auto check = std::make_shared<ISNULL>(left.value);
-            return std::make_shared<Operand>(check);
+            return Operand(std::make_shared<ISNULL>(left.value));
         }
     }
 
@@ -309,19 +314,13 @@ std::shared_ptr<Operand> Parser::parseComparison() {
     std::string op = peeked.value;
     advance(); // consume operator
 
-    // Determine right-hand side
-    std::shared_ptr<Operand> rightOperand;
-    Token next = peek();
-
-
     Literal rightLiteral = parseLiteral();
-
     auto comp = ComparisonOperator::fromLiteral(op, left, rightLiteral);
-    return std::make_shared<Operand>(comp);
+    return Operand(comp);
 }
 
 CreateAST Parser::parseCreate() {
-    /*CREATE TABLE <table_name> (<column_name> <data_type>, [, <column_name2> <data_type2> ...])*/
+    ////CREATE TABLE <table_name> (<column_name> <data_type>, [, <column_name2> <data_type2> ...])
     expect("CREATE");
     expect("TABLE");
     Identifier table = parseTable();
@@ -343,41 +342,9 @@ CreateAST Parser::parseCreate() {
     return {table.value, columns, columnTypes};
 }
 
-SelectAST Parser::parseSelect() {
-    /*SELECT <columns> FROM <table> [WHERE <expr>] [ORDER BY <column> ASC|DESC]*/
-
-    expect("SELECT");
-
-    std::vector<Identifier> columns;
-
-    if (peek().type == "STAR") {
-        advance();
-        columns.emplace_back(Identifier::Type::COLUMN, "*");
-    } else {
-        columns = parseColumns();
-    }
-
-    expect("FROM");
-
-    std::vector<Identifier> tables = parseTables();
-
-    std::shared_ptr<Operand> whereExpr = nullptr;
-    if (peek().type == "WHERE") {
-        advance();
-        whereExpr = parseExpression();
-    }
-
-    std::string order_by;
-//    if (peek().type == "ORDER") {
-//    advance();
-//        order_by = parseOrderBy();
-//    }
-
-    return {columns, tables, whereExpr, order_by};
-}
 
 InsertAST Parser::parseInsert() {
-    /*INSERT INTO <table> (<columns>) VALUES (<values>)*/
+    ////INSERT INTO <table> (<columns>) VALUES (<values>)
     expect("INSERT");
     expect("INTO");
 
@@ -397,8 +364,57 @@ InsertAST Parser::parseInsert() {
 
 }
 
-UpdateAST Parser::parse_update() {
-    /*UPDATE <table> SET <column>=<value> [, <column>=<value> ...] [WHERE <condition>]*/
+SelectAST Parser::parseSelect() {
+    ////SELECT <columns> FROM <table> [WHERE <expr>] [ORDER BY <column> ASC|DESC]
+
+    expect("SELECT");
+
+    std::vector<Identifier> columns;
+
+    if (peek().type == "STAR") {
+        advance();
+        columns.emplace_back(Identifier::Type::COLUMN, "*");
+    } else {
+        columns = parseColumns();
+    }
+
+    expect("FROM");
+
+    std::vector<Identifier> tables = parseTables();
+
+    std::optional<Operand> whereExpr;
+    if (peek().type == "WHERE") {
+        advance();
+        whereExpr = parseExpression();
+    }
+
+    std::vector<std::pair<Identifier, std::string>> orderBy;
+    if (peek().type == "ORDER") {
+        advance();
+        orderBy = parseOrderBy();
+    }
+
+    return {columns, tables, whereExpr, orderBy};
+}
+
+DeleteAST Parser::parseDelete() {
+    ////DELETE FROM <table> [WHERE <condition>]
+    expect("DELETE");
+    expect("FROM");
+
+    Identifier table = parseTable();
+
+    std::optional<Operand> whereExpr;
+    if (peek().type == "WHERE") {
+        advance();
+        whereExpr = parseExpression();
+    }
+
+    return {table, whereExpr};
+}
+
+UpdateAST Parser::parseUpdate() {
+    ////UPDATE <table> SET <column>=<value> [, <column>=<value> ...] [WHERE <condition>]
     expect("UPDATE");
 
     Identifier table = parseTable();
@@ -406,29 +422,27 @@ UpdateAST Parser::parse_update() {
     expect("SET");
 
     std::vector<std::pair<Identifier, Literal>> assignments = parseAssignments();
-    std::string where_expr;
-//    if (peek().type == "WHERE") {
-//        advance();  // Skip the "WHERE"
-//        where_expr = parseExpression();  // You can leave this as a placeholder for expression parsing
-//    }
 
-    return {table, assignments, where_expr};
+    std::optional<Operand> whereExpr;
+    if (peek().type == "WHERE") {
+        advance();
+        whereExpr = parseExpression();
+    }
+
+    return {table, assignments, whereExpr};
 }
 
-//DeleteStmt Parser::parse_delete() {
-//    /*DELETE FROM <table> [WHERE <condition>]*/
-//    return "Parsed DELETE";
-//}
+
 //
 //
 //
 //DropStmt Parser::parse_drop() {
-//    /*DROP TABLE <table_name> [, <table_name2> ...]*/
+//    ////DROP TABLE <table_name> [, <table_name2> ...]
 //    return "Parsed DROP";
 //}
 
 //string Parser::parse_alter() {
-//    /*ALTER TABLE <table_name> [ADD COLUMN <column_name> <data_type> [<constraints>]]
+//    ////ALTER TABLE <table_name> [ADD COLUMN <column_name> <data_type> [<constraints>]]
 //          | [DROP COLUMN <column_name>]
 //          | [RENAME COLUMN <old_name> TO <new_name>]
 //          | [MODIFY COLUMN <column_name> <new_data_type> [<constraints>]]*/

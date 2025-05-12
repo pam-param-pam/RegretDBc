@@ -5,10 +5,12 @@
 #include <vector>
 #include "../DataManager.h"
 #include <sstream>
+#include <memory>
 
 #include "../exceptions/exceptions.h"
 #include "fmt/base.h"
 #include "../tokenTypes/Identifier.h"
+#include "../operators/Operand.h"
 
 class ASTNode {
 protected:
@@ -17,6 +19,9 @@ protected:
     std::vector<std::string> checkTables(const std::vector<Identifier>& tables);
     std::string checkColumn(std::vector<std::string> tables, const std::string& column);
     std::vector<std::string> checkColumns(const std::vector<std::string> &tables, const std::vector<Identifier> &columns);
+    std::pair<std::string, std::string> splitColumn(const std::string &column);
+    void checkColumnType(TypeHints::ColumnTypeMap columnTypeMap, const std::string &qualifiedColumn, const Literal &literal);
+    void checkWhereExpr(const std::vector<std::string> &tableNames, const std::optional<Operand> &whereExpr);
 
 public:
     ASTNode();
@@ -27,12 +32,6 @@ public:
 
     virtual void performChecks() = 0;
     [[nodiscard]] virtual std::string repr() const = 0;
-
-private:
-
-
-    std::pair<std::string, std::string> splitColumn(const std::string &column);
-
 };
 
 

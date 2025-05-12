@@ -14,6 +14,9 @@ void RegretDB::executeOrder66(const std::string& sql_stmt) {
     statement->verify();
 //    fmt::println("verified");
     plan = planner.plan(statement);
-    plan->execute();
+//    fmt::println("ExecutionPlanner: " + plan->toString(1));
 
+//    fmt::println("44444444444444");
+    plan->execute();
+//    fmt::println("5555555555555");
 }

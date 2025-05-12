@@ -22,14 +22,16 @@ void CreateAST::performChecks() {
 }
 
 std::string CreateAST::repr() const {
-    std::ostringstream ss;
-    ss << "CreateStmt(table=" << name << ", columns=[";
-    for (size_t i = 0; i < columns.size(); ++i) {
-        ss << "(" << columns[i].value << ", " << Literal::typeToString(columnTypes[i]) << ")";
-        if (i < columns.size() - 1) ss << ", ";
+    std::string repr = fmt::format("CreateStmt(table={}, columns=[", name);
+
+    for (auto i = 0; i < columns.size(); ++i) {
+        repr += fmt::format("({}, {})", columns[i].value, Literal::typeToString(columnTypes[i]));
+        if (i < columns.size() - 1) {
+            repr += ", ";
+        }
     }
-    ss << "])";
-    return ss.str();
+    repr += "]";
+    return repr;
 }
 
 

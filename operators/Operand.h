@@ -26,7 +26,7 @@ public:
     explicit Operand(std::shared_ptr<IsNullCheck> nullOp);
     explicit Operand(std::shared_ptr<LogicalOperator> logicalOp);
     //https://www.geeksforgeeks.org/std-function-in-cpp/
-    void visitColumns(const std::function<void(std::string&)>& visitor) const;
+    void visitColumns(const std::function<void(std::string &, const std::optional<Literal> &)>& visitor) const;
 
     [[nodiscard]] Type getType() const;
     [[nodiscard]] std::string toString() const;
@@ -39,4 +39,5 @@ private:
     std::shared_ptr<ComparisonOperator> comparisonOp;
     std::shared_ptr<IsNullCheck> nullOp;
     std::shared_ptr<LogicalOperator> logicalOp;
+
 };

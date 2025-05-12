@@ -1,9 +1,11 @@
 #include "ExecutionPlanner.h"
 #include "PlanNodes/CreateTablePlan.h"
 #include "PlanNodes/InsertPlan.h"
+#include "PlanNodes/SelectPlans.h"
+#include "PlanNodes/DeletePlan.h"
+#include "PlanNodes/UpdatePlan.h"
 
 std::shared_ptr<PlanNodeBase> ExecutionPlanner::plan(const std::shared_ptr<ASTNode> &statement) {
-    fmt::println("ExecutionPlanner: plan");
 
     if (auto createAST = std::dynamic_pointer_cast<CreateAST>(statement)) {
         CreateTablePlan plan = CreateTablePlan(createAST->name, createAST->qualifiedColumns, createAST->columnTypes);
@@ -15,70 +17,69 @@ std::shared_ptr<PlanNodeBase> ExecutionPlanner::plan(const std::shared_ptr<ASTNo
     }
 
     if (auto selectAST = std::dynamic_pointer_cast<SelectAST>(statement)) {
-//        selectAST->whereExpr->evaluate()
 
-    }
-//        // Step 1: TableScans
-//        std::vector<std::shared_ptr<TableScan>> scans;
-//        for (const auto& table : select_stmt->tables) {
-//            scans.push_back(std::make_shared<TableScan>(table));
-//        }
-//
-//        // Step 2: Build cross joins
-//        std::shared_ptr<PlanNode> plan = scans[0];
-//        for (size_t i = 1; i < scans.size(); ++i) {
-//            plan = std::make_shared<CrossJoin>(plan, scans[i]);
-//        }
-//
-//        // Step 3: WHERE clause
-//        if (!select_stmt->where_expr.empty()) {
-//            plan = std::make_shared<Filter>(plan, select_stmt->where_expr);
-//        }
-//
-//        // Step 4: SELECT columns
-//        plan = std::make_shared<Project>(plan, select_stmt->columns);
-//
+        std::vector<std::shared_ptr<PlanNodeBase>> scans;
+        for (const auto& table : selectAST->getTableNames()) {
+            scans.push_back(std::make_shared<TableScan>(table));
+        }
+
+        // Step 2: Chain them into CrossJoins
+        std::shared_ptr<PlanNodeBase> plan = scans[0];
+        for (size_t i = 1; i < scans.size(); ++i) {
+            plan = std::make_shared<CrossJoin>(plan, scans[i]);
+        }
+
+        // Step 3: WHERE clause
+        if (selectAST->whereExpr) {
+            plan = std::make_shared<Filter>(plan, *selectAST->whereExpr);
+        }
+
+        // Step 4: SELECT columns
+        plan = std::make_shared<Project>(plan, selectAST->getQualifiedColumns());
+
 //        // Step 5: ORDER BY
-//        if (!select_stmt->order_by.empty()) {
-//            plan = std::make_shared<Sort>(plan, select_stmt->order_by);
+//        auto orderBy = selectAST->getQualifiedOrderBy();
+//        if (!orderBy.empty()) {
+//            plan = std::make_shared<Sort>(plan, selectAST->getQualifiedOrderBy());
 //        }
-//
-//        // Step 6: Visualize
-//        plan = std::make_shared<Visualize>(plan);
-//
-//        return plan;
-//    }
 
-//    else if (auto update_stmt = std::dynamic_pointer_cast<UpdateStmt>(statement)) {
-//        // Step 1: Scan the target table
-//        auto scan = std::make_shared<TableScan>(update_stmt->table);
+        // Step 6: Visualize
+        plan = std::make_shared<Visualize>(plan);
+
+        return plan;
+    }
+
+    else if (auto deleteAST = std::dynamic_pointer_cast<DeleteAST>(statement)) {
+        // Step 1: Scan the target table
+        auto scan = std::make_shared<TableScan>(deleteAST->getTableName());
+
+        // Step 2: Filter rows using WHERE clause
+        std::shared_ptr<PlanNodeBase> plan = scan;
+        if (deleteAST->whereExpr) {
+            plan = std::make_shared<Filter>(plan, *deleteAST->whereExpr);
+        }
+
+        // Step 3: Apply Delete operations
+        plan = std::make_shared<DeletePlan>(plan, deleteAST->getTableName());
+
+        return plan;
+    }
+    else if (auto updateAST = std::dynamic_pointer_cast<UpdateAST>(statement)) {
+        // Step 1: Scan the target table
+        auto scan = std::make_shared<TableScan>(updateAST->getTableName());
+
+        // Step 2: Filter rows using WHERE clause
+        std::shared_ptr<PlanNodeBase> plan = scan;
+        if (deleteAST->whereExpr) {
+            plan = std::make_shared<Filter>(plan, *updateAST->whereExpr);
+        }
+
+        // Step 3: Apply Update operations
+        plan = std::make_shared<UpdatePlan>(plan, updateAST->getQualifiedAssignments(), updateAST->getTableName());
+
+        return plan;
+    }
 //
-//        // Step 2: Filter rows using WHERE clause
-//        std::shared_ptr<PlanNode> plan = scan;
-//        if (!update_stmt->where_expr.empty()) {
-//            plan = std::make_shared<Filter>(plan, update_stmt->where_expr);
-//        }
-//
-//        // Step 3: Apply Update operations
-//        plan = std::make_shared<Update>(plan, update_stmt->assignments, update_stmt->table);
-//
-//        return plan;
-//    }
-//    else if (auto delete_stmt = std::dynamic_pointer_cast<DeleteStmt>(statement)) {
-//        // Step 1: Scan the target table
-//        auto scan = std::make_shared<TableScan>(delete_stmt->table);
-//
-//        // Step 2: Filter rows using WHERE clause
-//        std::shared_ptr<PlanNode> plan = scan;
-//        if (!delete_stmt->where_expr.empty()) {
-//            plan = std::make_shared<Filter>(plan, delete_stmt->where_expr);
-//        }
-//
-//        // Step 3: Apply Delete operations
-//        plan = std::make_shared<Delete>(plan, delete_stmt->table, delete_stmt->where_expr);
-//
-//        return plan;
-//    }
 //    else if (auto drop_stmt = std::dynamic_pointer_cast<DropStmt>(statement)) {
 //        return std::make_shared<DropTable>(drop_stmt->table);
 //    }

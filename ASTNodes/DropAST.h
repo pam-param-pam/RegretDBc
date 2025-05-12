@@ -11,4 +11,7 @@ public:
 
     void performChecks() override;
     [[nodiscard]] std::string repr() const override;
+
+private:
+    std::string tableName;
 };

@@ -27,6 +27,9 @@ std::pair<TypeHints::Value, TypeHints::Value> ComparisonOperator::resolveAndUnpa
 
     return {val, lit};
 }
+void ComparisonOperator::visitColumns(const std::function<void(std::string&, const std::optional<Literal>&)>& visitor) {
+    visitor(columnName, literal);
+}
 
 //// ------------ EQ ------------
 

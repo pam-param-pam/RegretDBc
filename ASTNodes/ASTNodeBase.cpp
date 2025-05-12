@@ -53,6 +53,7 @@ std::pair<std::string, std::string> ASTNode::splitColumn(const std::string& colu
     }
 }
 
+//perhaps work on reference instead? todo
 std::string ASTNode::checkColumn(std::vector<std::string> tables, const std::string& column) {
     auto [table_name, col_name] = splitColumn(column);
     bool flag = false;
@@ -95,4 +96,26 @@ std::vector<std::string> ASTNode::checkColumns(const std::vector<std::string>& t
     }
 
     return seen;
+}
+
+void ASTNode::checkColumnType(TypeHints::ColumnTypeMap columnTypeMap, const std::string& qualifiedColumn, const Literal& literal) {
+    const Literal::Type& valueType = literal.getType();
+    const Literal::Type& expectedType = columnTypeMap.at(qualifiedColumn);
+
+    if (expectedType != valueType && valueType != Literal::Type::NULL_VALUE) {
+        throw PreProcessorError("Type mismatch! Expected: " + Literal::typeToString(expectedType) + ", got: " + Literal::typeToString(valueType));
+    }
+}
+
+void ASTNode::checkWhereExpr(const std::vector<std::string>& tableNames, const std::optional<Operand>& whereExpr) {
+    whereExpr->visitColumns([this, &tableNames](std::string &column, const std::optional<Literal> &literal) {
+        column = checkColumn(tableNames, column);
+
+        if (literal) {
+            auto [tableName, colName] = splitColumn(column);
+            auto columnTypeMap = DataManager::getInstance().getColumnTypesForTable(tableName);
+            checkColumnType(columnTypeMap, column, *literal);
+        }
+
+    });
 }

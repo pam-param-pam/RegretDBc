@@ -8,28 +8,26 @@
 #include "../operators/Operand.h"
 #include <memory>
 
-// Define the SelectStmt class inheriting from ASTNode
 class SelectAST : public ASTNode {
 public:
-    // Members for columns, tables, where expression, and order by
-    std::vector<Identifier> columns;
-    std::vector<Identifier> tables;
-    std::shared_ptr<Operand> whereExpr;
-    std::string order_by;
+    std::optional<Operand> whereExpr;
 
-    // Constructor
-    SelectAST(const std::vector<Identifier>& columns, const std::vector<Identifier>& tables, std::shared_ptr<Operand> whereExpr, std::string order_by);
+    SelectAST(const std::vector<Identifier>& columns, const std::vector<Identifier>& tables, std::optional<Operand> whereExpr, std::vector<std::pair<Identifier, std::string>> orderBy);
 
-    // Override perform_checks method from ASTNode
     void performChecks() override;
 
-    // Override the __repr__ method (using operator<< for printing in C++)
     [[nodiscard]] std::string repr() const;
 
     [[nodiscard]] const std::vector<std::string> &getTableNames() const;
     [[nodiscard]] const std::vector<std::string> &getQualifiedColumns() const;
+    [[nodiscard]] const std::vector<std::pair<std::string, bool>> &getQualifiedOrderBy() const;
+
 private:
     std::vector<std::string> tableNames;
     std::vector<std::string> qualifiedColumns;
+    std::vector<std::pair<std::string, bool>> qualifiedOrderBy;
+    std::vector<Identifier> columns;
+    std::vector<Identifier> tables;
+    std::vector<std::pair<Identifier, std::string>> orderBy;
 };
 

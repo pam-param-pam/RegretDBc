@@ -2,19 +2,43 @@
 #include "fmt/format.h"
 #include "fmt/ranges.h"
 
-#include <sstream>
-#include <utility>
-
 
 // Constructor definition
-SelectAST::SelectAST(const std::vector<Identifier> &columns, const std::vector<Identifier> &tables, std::shared_ptr<Operand> whereExpr, std::string order_by)
-        : columns(columns), tables(tables), whereExpr(std::move(whereExpr)), order_by(std::move(order_by)) {
+SelectAST::SelectAST(const std::vector<Identifier> &columns, const std::vector<Identifier> &tables, std::optional<Operand> whereExpr,
+                     std::vector<std::pair<Identifier, std::string>> orderBy)
+        : columns(columns), tables(tables), whereExpr(std::move(whereExpr)), orderBy(std::move(orderBy)) {
 }
 
 void SelectAST::performChecks() {
     tableNames = checkTables(tables);
-    qualifiedColumns = checkColumns(tableNames, columns);
-    //todo validate where clause, and orderBy clause
+
+
+    for (const auto& col : columns) {
+        if (col.value == "*") {
+            for (const auto& table : tableNames) {
+                const auto& tableColumns = DataManager::getInstance().getColumnsForTable(table);
+                for (const auto& expandedColumn : tableColumns) {
+                    qualifiedColumns.push_back(checkColumn(tableNames, expandedColumn));
+                }
+            }
+        } else {
+            qualifiedColumns.push_back(checkColumn(tableNames, col.value));
+        }
+    }
+//    fmt::println("COLUMNS");
+//    fmt::println("{}\n", fmt::join(qualifiedColumns, " "));
+
+    checkWhereExpr(tableNames, whereExpr);
+
+    //checking order by:
+    for (const auto& [identifier, direction] : orderBy) {
+        auto qualifiedColumn = checkColumn(tableNames, identifier.value);
+
+        bool isDescending = (direction == "DESC");
+
+        qualifiedOrderBy.emplace_back(qualifiedColumn, isDescending);
+    }
+
 }
 
 const std::vector<std::string>& SelectAST::getTableNames() const {
@@ -25,23 +49,32 @@ const std::vector<std::string>& SelectAST::getQualifiedColumns() const {
     return qualifiedColumns;
 }
 
-std::string SelectAST::repr() const {
-    std::vector<std::string> column_reprs;
-    column_reprs.reserve(columns.size());
-    for (const auto &col: columns) {
-        column_reprs.push_back(col.toString());
-    }
-
-    std::vector<std::string> table_reprs;
-    table_reprs.reserve(tables.size());
-    for (const auto &tbl: tables) {
-        table_reprs.push_back(tbl.toString());
-    }
-
-    return fmt::format("SelectStmt(columns=[{}], tables=[{}], where={}, order_by={})",
-                       fmt::join(column_reprs, ", "),
-                       fmt::join(table_reprs, ", "),
-                       whereExpr->toString(), order_by);
+const std::vector<std::pair<std::string, bool>> &SelectAST::getQualifiedOrderBy() const {
+    return qualifiedOrderBy;
 }
 
+std::string SelectAST::repr() const {
+    std::vector<std::string> columnReprs;
+    columnReprs.reserve(columns.size());
+    for (const auto &col: columns) {
+        columnReprs.push_back(col.toString());
+    }
 
+    std::vector<std::string> tableReprs;
+    tableReprs.reserve(tables.size());
+    for (const auto &tbl: tables) {
+        tableReprs.push_back(tbl.toString());
+    }
+
+    std::vector<std::string> orderByReprs;
+    orderByReprs.reserve(orderBy.size());
+    for (const auto& [identifier, direction] : orderBy) {
+        orderByReprs.push_back(fmt::format("({}, {})", identifier.toString(), direction));
+    }
+
+    return fmt::format("SelectStmt(columns=[{}], tables=[{}], where={}, order_by=[{}])",
+                       fmt::join(columnReprs, ", "),
+                       fmt::join(tableReprs, ", "),
+                       whereExpr ? whereExpr->toString() : "None",
+                       fmt::join(orderByReprs, ", "));
+}

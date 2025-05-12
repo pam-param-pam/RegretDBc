@@ -6,9 +6,10 @@
 #include "../operators/Operand.h"
 
 
-class DeletePlan : public PlanNodeBase {
+class UpdatePlan : public PlanNodeBase {
 public:
-    explicit DeletePlan(const std::shared_ptr<PlanNodeBase>& source, std::string tableName);
+    explicit UpdatePlan(const std::shared_ptr<PlanNodeBase>& source, std::string tableName, const std::vector<std::pair<std::string, Literal>>& assignments);
+
     void execute() override;
     [[nodiscard]] std::string toString(int level) const override;
     [[nodiscard]] TypeHints::TableData getResult() const override;
@@ -16,5 +17,6 @@ public:
 private:
     std::string tableName;
     std::shared_ptr<PlanNodeBase> source;
+    const std::vector<std::pair<std::string, Literal>>& assignments;
 
 };

@@ -8,20 +8,21 @@ InsertAST::InsertAST(Identifier table, const std::vector<Identifier>& columns, c
 
 void InsertAST::performChecks() {
     tableName = checkTable(table);
-
     qualifiedColumns = checkColumns({ tableName }, columns);
 
     TypeHints::ColumnTypeMap columnTypeMap = DataManager::getInstance().getColumnTypesForTable(tableName);
 
+    if (columns.size() != values.size()) {
+        throw PreProcessorError("Number of columns does not match number of values");
+    }
+    if (columns.size() != columnTypeMap.size()) {
+        throw PreProcessorError("Number of columns does not match number of columns in the actual talbe");
+    }
+
     // Check if the types of values match the expected types for each column
     for (size_t i = 0; i < qualifiedColumns.size(); ++i) {
-        const auto& qualifiedColumn = qualifiedColumns[i];
-        const Literal::Type& valueType = values[i].getType();
-        const Literal::Type& expectedType = columnTypeMap.at(qualifiedColumn);
 
-        if (expectedType != valueType) {
-            throw PreProcessorError("Type mismatch! Expected: " + Literal::typeToString(expectedType) + ", got: " + Literal::typeToString(valueType));
-        }
+        checkColumnType(columnTypeMap, qualifiedColumns[i], values[i]);
 
     }
 

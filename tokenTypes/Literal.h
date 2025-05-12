@@ -16,7 +16,8 @@ public:
 
     using Value = std::variant<std::monostate, std::string, int, bool>;  //unable to use TypeHints due to I think circular include
 
-    Literal(Type type, Value value, std::optional<size_t> size = std::nullopt);
+    Literal(Type type, Value value);
+    explicit Literal(const Value& val);
 
     [[nodiscard]] std::string toString() const;
     [[nodiscard]] Value getValue() const;
@@ -28,6 +29,4 @@ public:
 private:
     Type type;
     Value value;
-    std::optional<size_t> size;
-
 };

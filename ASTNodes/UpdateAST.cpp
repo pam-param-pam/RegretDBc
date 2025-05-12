@@ -1,21 +1,44 @@
 #include "UpdateAST.h"
+#include "fmt/format.h"
 #include <sstream>
 
-UpdateAST::UpdateAST(Identifier table, const std::vector<std::pair<Identifier, Literal>>& assignments, std::string  where_expr)
-        : table(std::move(table)), assignments(assignments), where_expr(std::move(where_expr)) {}
+UpdateAST::UpdateAST(Identifier table, const std::vector<std::pair<Identifier, Literal>> &assignments, std::optional<Operand> whereExpr)
+        : table(std::move(table)), assignments(assignments), whereExpr(std::move(whereExpr)) {}
 
 void UpdateAST::performChecks() {
+    tableName = checkTable(table);
+
+    checkWhereExpr({tableName}, whereExpr);
+
+    const auto& colTypesMap = DataManager::getInstance().getColumnTypesForTable(tableName);
+
+    for (const auto& [col, literal] : assignments) {
+        auto qualifiedColumn = checkColumn({tableName}, col.value);
+        checkColumnType(colTypesMap, qualifiedColumn, literal);
+        qualifiedAssignments.emplace_back(qualifiedColumn, literal);
+    }
+}
+
+const std::string &UpdateAST::getTableName() const {
+    return tableName;
+}
+
+const std::vector<std::pair<std::string, Literal>> &UpdateAST::getQualifiedAssignments() const {
+    return qualifiedAssignments;
 }
 
 std::string UpdateAST::repr() const {
-    std::ostringstream ss;
-    ss << "UpdateStmt(table=" << table.value << ", assignments=[";
-
+    std::string assignmentStr;
     for (size_t i = 0; i < assignments.size(); ++i) {
-        ss << "(" << assignments[i].first.value << ", " << assignments[i].second.toString() << ")";
-        if (i < assignments.size() - 1) ss << ", ";
+        assignmentStr += fmt::format("({}, {})", assignments[i].first.value, assignments[i].second.toString());
+        if (i < assignments.size() - 1) {
+            assignmentStr += ", ";
+        }
     }
 
-    ss << "], where=" << where_expr << ")";
-    return ss.str();
+    return fmt::format("UpdateStmt(table={}, assignments=[{}], where={})",
+                       table.value, assignmentStr,
+                       whereExpr ? whereExpr->toString() : "None");
 }
+
+

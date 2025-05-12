@@ -1,4 +1,5 @@
 #include "NullOperators.h"
+#include "fmt/base.h"
 
 #include <utility>
 
@@ -7,10 +8,10 @@ IsNullCheck::IsNullCheck(std::string columnName)
         : columnName(std::move(columnName)) {}
 
 std::string IsNullCheck::toString() const {
-    return columnName + (isNullCheck() ? " IS NULL" : " IS NOT NULL");
+    return (isNullCheck() ? "IS_NULL(" : "IS_NOT_NULL(") + columnName + ")";
 }
 
-std::optional<IsNullCheck::Value> IsNullCheck::resolve(const Row& row) const {
+IsNullCheck::Value IsNullCheck::resolve(const Row& row) const {
     auto it = row.find(columnName);
     if (it == row.end()) {
         throw IntegrityError("Unexpected: Column '" + columnName + "' not found in row");
@@ -21,12 +22,15 @@ std::optional<IsNullCheck::Value> IsNullCheck::resolve(const Row& row) const {
 
 std::optional<bool> IsNullCheck::evaluate(const IsNullCheck::Row &row) const {
     auto value = resolve(row);
-    if (value) {
-        return !isNullCheck();
-    }
-    return isNullCheck();
+    bool isNull = std::holds_alternative<std::monostate>(value);
+    return isNullCheck() ? isNull : !isNull;
 
 }
+
+void IsNullCheck::visitColumns(const std::function<void(std::string&, const std::optional<Literal> &)> &visitor) {
+    visitor(columnName, std::nullopt);  // No literal available
+}
+
 
 ////------------ IS NULL ------------
 ISNULL::ISNULL(std::string columnName)

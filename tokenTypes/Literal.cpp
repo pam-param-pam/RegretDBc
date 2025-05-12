@@ -1,7 +1,23 @@
 #include "Literal.h"
 
-Literal::Literal(Type type, Value value, std::optional<size_t> size)
-        : type(type), value(std::move(value)), size(size) {}
+Literal::Literal(Type type, Value value)
+        : type(type), value(std::move(value)) {}
+
+Literal::Literal(const Value& val) {
+    if (std::holds_alternative<std::string>(val)) {
+        type = Type::TEXT;
+        value = std::get<std::string>(val);
+    } else if (std::holds_alternative<int>(val)) {
+        type = Type::INTEGER;
+        value = std::get<int>(val);
+    } else if (std::holds_alternative<bool>(val)) {
+        type = Type::BOOLEAN;
+        value = std::get<bool>(val);
+    } else {
+        type = Type::NULL_VALUE;
+        value = std::monostate{};
+    }
+}
 
 std::string Literal::toString() const {
     switch (type) {

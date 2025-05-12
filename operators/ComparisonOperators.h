@@ -2,42 +2,12 @@
 
 #include <string>
 #include <optional>
+#include <functional>
 #include "../TypeHints.h"
 #include "../tokenTypes/Literal.h"
 #include "../exceptions/exceptions.h"
 #include "../tokenTypes/Identifier.h"
-//> < != >= <=
 
-//AND OR, ComparisonOperator
-
-//NOT ...
-
-// not true
-// not (ala > 1)
-// not and(ala > 1, ala < 1)
-// not (ala is null)
-
-
-// SELECT * FROM users WHERE not (ala is null)
-
-
-// class NOT:
-//     source = coś
-//     return !source.evaluate() -> bool
-
-
-
-
-//IS NOT NULL
-//IS NULL
-
-
-//WHERE CLAUSE
-//AND(ComparisonOperator) or AND(ComparisonOperator)
-
-//AND(FALSE) or (TRUE)
-
-//FALSE TRUE
 
 ////BASE CLASS
 class ComparisonOperator {
@@ -54,6 +24,7 @@ public:
     [[nodiscard]] virtual std::string toString() const = 0;
 
     static std::shared_ptr<ComparisonOperator> fromLiteral(const std::string &op, const Identifier &left, const Literal &right);
+    void visitColumns(const std::function<void(std::string &, const std::optional<Literal> &)> &visitor);
 
 protected:
     std::string columnName;
