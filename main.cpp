@@ -18,7 +18,7 @@ int main() {
     sql = "DELETE FROM users where isCool is null";
     engine.executeOrder66(sql);
 
-    sql = "SELECT * FROM users where isCool is null"; //ORDER BY name asc
+    sql = "SELECT * FROM users where isCool is not null"; //ORDER BY name asc
     engine.executeOrder66(sql);
 
 }

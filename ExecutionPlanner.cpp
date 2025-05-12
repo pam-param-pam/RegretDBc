@@ -64,21 +64,21 @@ std::shared_ptr<PlanNodeBase> ExecutionPlanner::plan(const std::shared_ptr<ASTNo
 
         return plan;
     }
-    else if (auto updateAST = std::dynamic_pointer_cast<UpdateAST>(statement)) {
-        // Step 1: Scan the target table
-        auto scan = std::make_shared<TableScan>(updateAST->getTableName());
-
-        // Step 2: Filter rows using WHERE clause
-        std::shared_ptr<PlanNodeBase> plan = scan;
-        if (deleteAST->whereExpr) {
-            plan = std::make_shared<Filter>(plan, *updateAST->whereExpr);
-        }
-
-        // Step 3: Apply Update operations
-        plan = std::make_shared<UpdatePlan>(plan, updateAST->getQualifiedAssignments(), updateAST->getTableName());
-
-        return plan;
-    }
+//    else if (auto updateAST = std::dynamic_pointer_cast<UpdateAST>(statement)) {
+//        // Step 1: Scan the target table
+//        auto scan = std::make_shared<TableScan>(updateAST->getTableName());
+//
+//        // Step 2: Filter rows using WHERE clause
+//        std::shared_ptr<PlanNodeBase> plan = scan;
+//        if (deleteAST->whereExpr) {
+//            plan = std::make_shared<Filter>(plan, *updateAST->whereExpr);
+//        }
+//
+//        // Step 3: Apply Update operations
+//        plan = std::make_shared<UpdatePlan>(plan, updateAST->getQualifiedAssignments(), updateAST->getTableName());
+//
+//        return plan;
+//    }
 //
 //    else if (auto drop_stmt = std::dynamic_pointer_cast<DropStmt>(statement)) {
 //        return std::make_shared<DropTable>(drop_stmt->table);
