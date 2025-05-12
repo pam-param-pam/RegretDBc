@@ -2,9 +2,9 @@
 #include "tokenTypes/Identifier.h"
 #include "fmt/base.h"
 #include "tokenTypes/Literal.h"
+#include "operators/Operand.h"
 #include <stdexcept>
 
-using std::string;
 
 bool parse_boolean(const std::string &token) {
     std::string lower_token = token;
@@ -50,7 +50,7 @@ Token Parser::advance() {
 }
 
 // Helper function to expect a specific token (by type or value)
-Token Parser::expect(const string &type_or_value) {
+Token Parser::expect(const std::string &type_or_value) {
     Token token = peek();
 
     if (token.type == type_or_value || token.value == type_or_value) {
@@ -62,7 +62,7 @@ Token Parser::expect(const string &type_or_value) {
 }
 
 // Main function to parse the SQL statement
-std::unique_ptr<ASTNode> Parser::parse(const string &sql_stmt) {
+std::unique_ptr<ASTNode> Parser::parse(const std::string &sql_stmt) {
     pos = 0;
     sql = sql_stmt;
     try {
@@ -207,11 +207,117 @@ std::vector<std::pair<Identifier, Literal>> Parser::parseAssignments() {
         if (peek().type != "COMMA") {
             break;
         }
-
         advance(); // skip comma
     }
-
     return assignments;
+}
+std::vector<std::pair<Identifier, std::string>> Parser::parseOrderBy() {
+    expect("ORDER");
+    expect("BY");
+
+    std::vector<std::pair<Identifier, std::string>> orderings;
+
+    while (true) {
+        Identifier column = parseColumn();
+
+        Token directionToken = peek();
+        if (directionToken.value != "ASC" && directionToken.value != "DESC") {
+            throw SQLSyntaxError("Expected 'ASC' or 'DESC', found '" + directionToken.type + "'");
+        }
+
+        std::string direction = directionToken.value;
+        advance();
+
+        orderings.emplace_back(column, direction);
+
+        if (peek().type != "COMMA") {
+            break;
+        }
+        advance();
+    }
+    return orderings;
+}
+std::shared_ptr<Operand> Parser::parseExpression() {
+    return parseOr();  // Lowest precedence
+}
+
+std::shared_ptr<Operand> Parser::parseOr() {
+    auto left = parseAnd();
+    while (peek().type == "OR") {
+        advance();
+        auto right = parseAnd();
+        left = std::make_shared<Operand>(std::make_shared<OR>(left, right));
+    }
+    return left;
+}
+
+std::shared_ptr<Operand> Parser::parseAnd() {
+    auto left = parseNot();
+    while (peek().type == "AND") {
+        advance();
+        auto right = parseNot();
+        left = std::make_shared<Operand>(std::make_shared<AND>(left, right));
+    }
+    return left;
+}
+
+std::shared_ptr<Operand> Parser::parseNot() {
+    if (peek().type == "NOT") {
+        advance();
+        auto operand = parseNot();
+        return std::make_shared<Operand>(std::make_shared<NOT>(operand));
+    }
+    return parseComparison();
+}
+std::shared_ptr<Operand> Parser::parseComparison() {
+    if (peek().type == "LPAREN") {
+        advance();
+        auto expr = parseExpression();
+        expect("RPAREN");
+        return expr;
+    }
+
+    Token token = peek();
+
+    if (token.type == "BOOLEAN") {
+        advance();
+        bool value = parse_boolean(token.value);
+        return std::make_shared<Operand>(value);
+    }
+
+    Identifier left = parseColumn();
+    Token peeked = peek();
+
+    if (peeked.type == "IS") {
+        advance();
+        if (peek().type == "NOT") {
+            advance();
+            expect("NULL");
+            auto check = std::make_shared<ISNOTNULL>(left.value);
+            return std::make_shared<Operand>(check);
+        } else {
+            expect("NULL");
+            auto check = std::make_shared<ISNULL>(left.value);
+            return std::make_shared<Operand>(check);
+        }
+    }
+
+    if (peeked.type != "OP") {
+        throw SQLSyntaxError("Expected comparison operator, found " + peeked.toString());
+    }
+
+    std::string op = peeked.value;
+    advance(); // consume operator
+
+    // Determine right-hand side
+    std::shared_ptr<Operand> rightOperand;
+    Token next = peek();
+
+
+    Literal rightLiteral = parseLiteral();
+
+    auto comp = ComparisonOperator::fromLiteral(op, left, rightLiteral);
+    return std::make_shared<Operand>(comp);
 }
 
 CreateAST Parser::parseCreate() {
@@ -255,19 +361,19 @@ SelectAST Parser::parseSelect() {
 
     std::vector<Identifier> tables = parseTables();
 
-    std::string where_expr;
-//    if (peek().type == "WHERE") {
-//        advance();
-//        where_expr = parse_expression();
-//    }
+    std::shared_ptr<Operand> whereExpr = nullptr;
+    if (peek().type == "WHERE") {
+        advance();
+        whereExpr = parseExpression();
+    }
 
     std::string order_by;
 //    if (peek().type == "ORDER") {
 //    advance();
-//        order_by = parse_order_by();
+//        order_by = parseOrderBy();
 //    }
 
-    return {columns, tables, where_expr, order_by};
+    return {columns, tables, whereExpr, order_by};
 }
 
 InsertAST Parser::parseInsert() {

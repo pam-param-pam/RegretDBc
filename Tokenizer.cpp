@@ -35,10 +35,10 @@ Tokenizer::Tokenizer() {
             "DELETE",
             "CREATE", "TABLE",
             "DROP",
-            "ALTER", "ADD", "RENAME", "MODIFY", "CASCADE", "RESTRICT",
-            "AND", "OR", "IS", "NOT", "NULL", "FALSE", "TRUE",
-            "PRIMARY", "FOREIGN", "KEY", "UNIQUE", "DEFAULT",
-            "TEXT", "NUMBER", "BLOB", "BOOL"
+            "ALTER", "ADD", "RENAME", "MODIFY",
+            "AND", "OR", "IS", "NOT", "FALSE", "TRUE",
+//            "PRIMARY", "FOREIGN", "KEY", "UNIQUE", "DEFAULT", "CASCADE", "RESTRICT",     //no support for constraints atp
+            "TEXT", "NUMBER", "BOOL", "NULL"
     };
 }
 

@@ -1,16 +1,28 @@
 #include "SelectAST.h"
 #include "fmt/format.h"
 #include "fmt/ranges.h"
+
 #include <sstream>
 #include <utility>
 
+
 // Constructor definition
-SelectAST::SelectAST(const std::vector<Identifier> &columns, const std::vector<Identifier> &tables, std::string where_expr, std::string order_by)
-        : columns(columns), tables(tables), where_expr(std::move(where_expr)), order_by(std::move(order_by)) {
+SelectAST::SelectAST(const std::vector<Identifier> &columns, const std::vector<Identifier> &tables, std::shared_ptr<Operand> whereExpr, std::string order_by)
+        : columns(columns), tables(tables), whereExpr(std::move(whereExpr)), order_by(std::move(order_by)) {
 }
 
 void SelectAST::performChecks() {
+    tableNames = checkTables(tables);
+    qualifiedColumns = checkColumns(tableNames, columns);
+    //todo validate where clause, and orderBy clause
+}
 
+const std::vector<std::string>& SelectAST::getTableNames() const {
+    return tableNames;
+}
+
+const std::vector<std::string>& SelectAST::getQualifiedColumns() const {
+    return qualifiedColumns;
 }
 
 std::string SelectAST::repr() const {
@@ -29,7 +41,7 @@ std::string SelectAST::repr() const {
     return fmt::format("SelectStmt(columns=[{}], tables=[{}], where={}, order_by={})",
                        fmt::join(column_reprs, ", "),
                        fmt::join(table_reprs, ", "),
-                       where_expr, order_by);
+                       whereExpr->toString(), order_by);
 }
 
 

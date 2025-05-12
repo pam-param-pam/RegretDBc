@@ -6,7 +6,7 @@ InsertPlan::InsertPlan(std::string tableName, std::vector<std::string> columns, 
 void InsertPlan::execute() {
     DataManager& data_manager = DataManager::getInstance();
 
-    DataManager::Row row;
+    TypeHints::Row row;
     for (size_t i = 0; i < columns.size(); ++i) {
         row[columns[i]] = values[i].getValue();
     }

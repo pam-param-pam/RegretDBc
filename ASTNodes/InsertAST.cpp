@@ -11,7 +11,7 @@ void InsertAST::performChecks() {
 
     qualifiedColumns = checkColumns({ tableName }, columns);
 
-    DataManager::ColumnTypeMap columnTypeMap = DataManager::getInstance().getColumnTypesForTable(tableName);
+    TypeHints::ColumnTypeMap columnTypeMap = DataManager::getInstance().getColumnTypesForTable(tableName);
 
     // Check if the types of values match the expected types for each column
     for (size_t i = 0; i < qualifiedColumns.size(); ++i) {
@@ -26,11 +26,11 @@ void InsertAST::performChecks() {
     }
 
 }
-const std::string& InsertAST::getModifiedTableName() const {
+const std::string& InsertAST::getTableName() const {
     return tableName;
 }
 
-const std::vector<std::string>& InsertAST::getModifiedQualifiedColumns() const {
+const std::vector<std::string>& InsertAST::getQualifiedColumns() const {
     return qualifiedColumns;
 }
 

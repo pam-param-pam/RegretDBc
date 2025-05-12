@@ -6,7 +6,7 @@ CreateTablePlan::CreateTablePlan(std::string name, const std::vector<std::string
 
 void CreateTablePlan::execute() {
     DataManager& data_manager = DataManager::getInstance();
-    DataManager::ColumnTypeMap col_types;
+    TypeHints::ColumnTypeMap col_types;
 
 
     for (size_t i = 0; i < columns.size(); ++i) {

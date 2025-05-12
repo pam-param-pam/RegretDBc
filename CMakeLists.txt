@@ -19,8 +19,6 @@ add_executable(RegretDB
         Parser.h
         Tokenizer.h
         Tokenizer.cpp
-        Operators/LogicalOperators.cpp
-        Operators/LogicalOperators.h
         TokenTypes/Identifier.cpp
         TokenTypes/Identifier.h
         TokenTypes/Literal.cpp
@@ -28,7 +26,7 @@ add_executable(RegretDB
         TokenTypes/Constraint.cpp
         TokenTypes/Constraint.h
         Token.cpp Token.h
-        ASTNodes/ASTNodeBase.cpp ASTNodes/ASTNodeBase.h exceptions/exceptions.cpp exceptions/exceptions.h ASTNodes/SelectAST.cpp ASTNodes/SelectAST.h ASTNodes/InsertAST.cpp ASTNodes/InsertAST.h ASTNodes/DeleteAST.cpp ASTNodes/DeleteAST.h ASTNodes/DropAST.cpp ASTNodes/DropAST.h ASTNodes/UpdateAST.cpp ASTNodes/UpdateAST.h ASTNodes/CreateAST.cpp ASTNodes/CreateAST.h ExecutionPlanner.cpp ExecutionPlanner.h PlanNodes/PlanNodeBase.cpp PlanNodes/PlanNodeBase.h DataManager.cpp DataManager.h PlanNodes/CreateTablePlan.cpp PlanNodes/CreateTablePlan.h PlanNodes/InsertPlan.cpp PlanNodes/InsertPlan.h PlanNodes/SelectPlans.cpp PlanNodes/SelectPlans.h RegretDB.cpp RegretDB.h RegretDBTypes.h)
+        ASTNodes/ASTNodeBase.cpp ASTNodes/ASTNodeBase.h exceptions/exceptions.cpp exceptions/exceptions.h ASTNodes/SelectAST.cpp ASTNodes/SelectAST.h ASTNodes/InsertAST.cpp ASTNodes/InsertAST.h ASTNodes/DeleteAST.cpp ASTNodes/DeleteAST.h ASTNodes/DropAST.cpp ASTNodes/DropAST.h ASTNodes/UpdateAST.cpp ASTNodes/UpdateAST.h ASTNodes/CreateAST.cpp ASTNodes/CreateAST.h ExecutionPlanner.cpp ExecutionPlanner.h PlanNodes/PlanNodeBase.cpp PlanNodes/PlanNodeBase.h DataManager.cpp DataManager.h PlanNodes/CreateTablePlan.cpp PlanNodes/CreateTablePlan.h PlanNodes/InsertPlan.cpp PlanNodes/InsertPlan.h PlanNodes/SelectPlans.cpp PlanNodes/SelectPlans.h RegretDB.cpp RegretDB.h TypeHints.h PlanNodes/DeletePlan.cpp PlanNodes/DeletePlan.h operators/ComparisonOperators.cpp operators/ComparisonOperators.h operators/LogicalOperators.cpp operators/LogicalOperators.h operators/NullOperators.cpp operators/NullOperators.h operators/Operand.cpp operators/Operand.h ASTNodes/AlterAST.cpp ASTNodes/AlterAST.h)
 
 target_link_libraries(RegretDB fmt)
 

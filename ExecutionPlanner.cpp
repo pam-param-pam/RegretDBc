@@ -6,20 +6,18 @@ std::shared_ptr<PlanNodeBase> ExecutionPlanner::plan(const std::shared_ptr<ASTNo
     fmt::println("ExecutionPlanner: plan");
 
     if (auto createAST = std::dynamic_pointer_cast<CreateAST>(statement)) {
-        fmt::println("1");
         CreateTablePlan plan = CreateTablePlan(createAST->name, createAST->qualifiedColumns, createAST->columnTypes);
         return std::make_shared<CreateTablePlan>(plan);
 
     } else if (auto insertAST = std::dynamic_pointer_cast<InsertAST>(statement)) {
-        InsertPlan plan = InsertPlan(insertAST->getModifiedTableName(), insertAST->getModifiedQualifiedColumns(), insertAST->values);
+        InsertPlan plan = InsertPlan(insertAST->getTableName(), insertAST->getQualifiedColumns(), insertAST->values);
         return std::make_shared<InsertPlan>(plan);
     }
 
+    if (auto selectAST = std::dynamic_pointer_cast<SelectAST>(statement)) {
+//        selectAST->whereExpr->evaluate()
 
-
-
-
-//    if (auto select_stmt = std::dynamic_pointer_cast<SelectStmt>(statement)) {
+    }
 //        // Step 1: TableScans
 //        std::vector<std::shared_ptr<TableScan>> scans;
 //        for (const auto& table : select_stmt->tables) {

@@ -18,8 +18,8 @@ public:
 
     [[nodiscard]] std::string repr() const;
 
-    [[nodiscard]] const std::string &getModifiedTableName() const;
-    [[nodiscard]] const std::vector<std::string> &getModifiedQualifiedColumns() const;
+    [[nodiscard]] const std::string &getTableName() const;
+    [[nodiscard]] const std::vector<std::string> &getQualifiedColumns() const;
 
 private:
     std::string tableName;

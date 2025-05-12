@@ -17,7 +17,6 @@
 #include "ASTNodes/DeleteAST.h"
 #include "ASTNodes/CreateAST.h"
 
-using std::string;
 
 class Parser {
 public:
@@ -40,7 +39,7 @@ private:
     Tokenizer tokenizer;
     std::vector<Token> tokens;
     size_t pos = 0;
-    string sql;
+    std::string sql;
     std::map<std::string, std::string> OPERATOR_MAP;
 
 
@@ -60,7 +59,19 @@ private:
 
     std::vector<Identifier> parseColumns();
 
-    string parseColumnType();
+    std::string parseColumnType();
 
     std::vector<std::pair<Identifier, Literal>> parseAssignments();
+
+    std::vector<std::pair<Identifier, std::string>> parseOrderBy();
+
+    std::shared_ptr<Operand> parseExpression();
+
+    std::shared_ptr<Operand> parseOr();
+
+    std::shared_ptr<Operand> parseAnd();
+
+    std::shared_ptr<Operand> parseNot();
+
+    std::shared_ptr<Operand> parseComparison();
 };
