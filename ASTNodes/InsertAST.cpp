@@ -10,7 +10,7 @@ void InsertAST::performChecks() {
     tableName = checkTable(table);
     qualifiedColumns = checkColumns({ tableName }, columns);
 
-    TypeHints::ColumnTypeMap columnTypeMap = DataManager::getInstance().getColumnTypesForTable(tableName);
+    const auto& columnTypeMap = DataManager::getInstance().getColumnTypesForTable(tableName);
 
     if (columns.size() != values.size()) {
         throw PreProcessorError("Number of columns does not match number of values");

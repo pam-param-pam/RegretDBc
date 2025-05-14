@@ -1,14 +1,18 @@
+//#pragma once
 //
-// Created by jedrz on 12.05.2025.
+//#include <string>
+//#include <vector>
+//#include <utility>
+//#include "ASTNodeBase.h"
 //
-
-#ifndef REGRETDB_ALTERAST_H
-#define REGRETDB_ALTERAST_H
-
-
-class AlterAST {
-
-};
-
-
-#endif //REGRETDB_ALTERAST_H
+//class AlterAST : public ASTNode {
+//public:
+//    AlterAST(Identifier table, std::string action, Identifier column, std::string dataTypeOrName);
+//
+//
+//
+//    void performChecks() override;
+//    [[nodiscard]] std::string repr() const override;
+//    std::vector<std::string> qualifiedColumns;
+//
+//};

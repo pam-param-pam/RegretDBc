@@ -9,7 +9,7 @@ RegretDBError::RegretDBError(const std::string &msg)
 }
 
 
-//// PreProcessorError
+/// PreProcessorError
 PreProcessorError::PreProcessorError(const std::string &msg)
         : RegretDBError(msg) {}
 

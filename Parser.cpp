@@ -3,6 +3,7 @@
 #include "fmt/base.h"
 #include "tokenTypes/Literal.h"
 #include "operators/Operand.h"
+#include "ASTNodes/AlterAST.h"
 #include <stdexcept>
 
 
@@ -87,10 +88,20 @@ std::unique_ptr<ASTNode> Parser::parse(const std::string &sql_stmt) {
         } else if (token.type == "UPDATE") {
             UpdateAST stmt = parseUpdate();
             ptr = std::make_unique<UpdateAST>(std::move(stmt));
-//        } else if (token.type == "DROP") {
-//        DropStmt stmt = parse_drop();
-//    } else if (token.type == "ALTER") {
-//        return parse_alter();
+        } else if (token.type == "DROP") {
+            DropAST stmt = parseDrop();
+            ptr = std::make_unique<DropAST>(std::move(stmt));
+        } else if (token.type == "ALTER") {
+//            expect("TABLE");
+//            auto table = parseTable();
+//            if (peek().type == "ADD") {
+//                AlterAddAST = parseAlterAdd(table);
+//            } else if (peek().type == "ADD") {
+//
+//            } else if (peek().type == "ADD") {
+//
+//            }
+
         } else {
             throw SQLSyntaxError("Unknown statement start: " + token.value);
         }
@@ -320,7 +331,7 @@ Operand Parser::parseComparison() {
 }
 
 CreateAST Parser::parseCreate() {
-    ////CREATE TABLE <table_name> (<column_name> <data_type>, [, <column_name2> <data_type2> ...])
+    ///CREATE TABLE <table_name> (<column_name> <data_type>, [, <column_name2> <data_type2> ...])
     expect("CREATE");
     expect("TABLE");
     Identifier table = parseTable();
@@ -344,7 +355,7 @@ CreateAST Parser::parseCreate() {
 
 
 InsertAST Parser::parseInsert() {
-    ////INSERT INTO <table> (<columns>) VALUES (<values>)
+    ///INSERT INTO <table> (<columns>) VALUES (<values>)
     expect("INSERT");
     expect("INTO");
 
@@ -365,7 +376,7 @@ InsertAST Parser::parseInsert() {
 }
 
 SelectAST Parser::parseSelect() {
-    ////SELECT <columns> FROM <table> [WHERE <expr>] [ORDER BY <column> ASC|DESC]
+    ///SELECT <columns> FROM <table> [WHERE <expr>] [ORDER BY <column> ASC|DESC]
 
     expect("SELECT");
 
@@ -398,7 +409,7 @@ SelectAST Parser::parseSelect() {
 }
 
 DeleteAST Parser::parseDelete() {
-    ////DELETE FROM <table> [WHERE <condition>]
+    ///DELETE FROM <table> [WHERE <condition>]
     expect("DELETE");
     expect("FROM");
 
@@ -414,7 +425,7 @@ DeleteAST Parser::parseDelete() {
 }
 
 UpdateAST Parser::parseUpdate() {
-    ////UPDATE <table> SET <column>=<value> [, <column>=<value> ...] [WHERE <condition>]
+    ///UPDATE <table> SET <column>=<value> [, <column>=<value> ...] [WHERE <condition>]
     expect("UPDATE");
 
     Identifier table = parseTable();
@@ -433,20 +444,33 @@ UpdateAST Parser::parseUpdate() {
 }
 
 
+DropAST Parser::parseDrop() {
+    ///DROP TABLE <table_name>
+    expect("DROP");
+    expect("TABLE");
+
+    Identifier table = parseTable();
+
+    return DropAST(table);
+}
+
+
+//AlterAddAST Parser::parseAlterAdd(const Identifier& table) {
+//    ///ALTER TABLE <table_name> [ADD COLUMN <column_name> <data_type> ]
+//    expect("ADD");
 //
-//
-//
-//DropStmt Parser::parse_drop() {
-//    ////DROP TABLE <table_name> [, <table_name2> ...]
-//    return "Parsed DROP";
 //}
-
-//string Parser::parse_alter() {
-//    ////ALTER TABLE <table_name> [ADD COLUMN <column_name> <data_type> [<constraints>]]
-//          | [DROP COLUMN <column_name>]
-//          | [RENAME COLUMN <old_name> TO <new_name>]
-//          | [MODIFY COLUMN <column_name> <new_data_type> [<constraints>]]*/
-//    return "Parsed ALTER";
+//
+//AlterDropAST Parser::parseAlterDrop(const Identifier& table) {
+//    ///ALTER TABLE <table_name> | [DROP COLUMN <column_name>]
+//
 //}
-
-
+//AlterRenameAST Parser::parseAlterDrop(Identifier table) {
+//    ///ALTER TABLE <table_name> | [RENAME COLUMN <old_name> TO <new_name>]
+//
+//}
+//AlterModifyAST Parser::parseAlterDrop(Identifier table) {
+//    ///ALTER TABLE <table_name> | [MODIFY COLUMN <column_name> <new_data_type>
+//
+//
+//}

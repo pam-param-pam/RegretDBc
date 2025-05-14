@@ -4,14 +4,14 @@ InsertPlan::InsertPlan(std::string tableName, std::vector<std::string> columns, 
         : tableName(std::move(tableName)), columns(std::move(columns)), values(std::move(values)) {}
 
 void InsertPlan::execute() {
-    DataManager& data_manager = DataManager::getInstance();
+    DataManager& dataManager = DataManager::getInstance();
 
     TypeHints::Row row;
     for (size_t i = 0; i < columns.size(); ++i) {
         row[columns[i]] = values[i].getValue();
     }
 
-    data_manager.insertRow(tableName, row);
+    dataManager.insertRow(tableName, row);
 }
 
 TypeHints::TableData InsertPlan::getResult() const {

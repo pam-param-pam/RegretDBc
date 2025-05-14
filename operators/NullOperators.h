@@ -8,7 +8,7 @@
 #include "../exceptions/exceptions.h"
 
 
-////------------ BASE CLASS ------------
+///------------ BASE CLASS ------------
 class IsNullCheck {
 public:
     using Row = TypeHints::Row;
@@ -28,7 +28,7 @@ protected:
 };
 
 
-////------------ IS NULL ------------
+///------------ IS NULL ------------
 class ISNULL : public IsNullCheck {
 public:
     explicit ISNULL(std::string columnName);
@@ -37,7 +37,7 @@ protected:
 };
 
 
-////------------ IS NOT NULL ------------
+///------------ IS NOT NULL ------------
 class ISNOTNULL : public IsNullCheck {
 public:
     explicit ISNOTNULL(std::string columnName);

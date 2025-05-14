@@ -8,7 +8,7 @@ UpdateAST::UpdateAST(Identifier table, const std::vector<std::pair<Identifier, L
 void UpdateAST::performChecks() {
     tableName = checkTable(table);
 
-    checkWhereExpr({tableName}, whereExpr);
+    if (whereExpr.has_value()) checkWhereExpr({tableName}, whereExpr);
 
     const auto& colTypesMap = DataManager::getInstance().getColumnTypesForTable(tableName);
 
@@ -35,7 +35,6 @@ std::string UpdateAST::repr() const {
             assignmentStr += ", ";
         }
     }
-
     return fmt::format("UpdateStmt(table={}, assignments=[{}], where={})",
                        table.value, assignmentStr,
                        whereExpr ? whereExpr->toString() : "None");

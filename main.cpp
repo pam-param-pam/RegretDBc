@@ -1,9 +1,9 @@
 #include "Token.h"
 #include "RegretDB.h"
-
+#include "utils.h"
 
 int main() {
-//
+
     RegretDB engine = RegretDB();
     std::string sql;
     sql = "CREATE TABLE users (id NUMBER, name TEXT, isCool BOOL)";
@@ -18,7 +18,18 @@ int main() {
     sql = "DELETE FROM users where isCool is null";
     engine.executeOrder66(sql);
 
-    sql = "SELECT * FROM users where isCool is not null"; //ORDER BY name asc
+    sql = "UPDATE users set isCool=null where true";
     engine.executeOrder66(sql);
+
+    sql = "DROP TABLE users";
+    engine.executeOrder66(sql);
+
+//    sql = "SELECT * FROM users";   //where isCool is not null ORDER BY name asc
+//    engine.executeOrder66(sql);
+
+    sql = "CREATE TABLE users (id NUMBER, name TEXT, isCool BOOL)";
+    engine.executeOrder66(sql);
+
+    visualizeTableStructure("users");
 
 }

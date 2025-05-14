@@ -5,7 +5,7 @@ CreateTablePlan::CreateTablePlan(std::string name, const std::vector<std::string
      : name(std::move(name)), columns(columns), columnTypes(columnTypes) {}
 
 void CreateTablePlan::execute() {
-    DataManager& data_manager = DataManager::getInstance();
+    DataManager& dataManager = DataManager::getInstance();
     TypeHints::ColumnTypeMap col_types;
 
 
@@ -13,8 +13,8 @@ void CreateTablePlan::execute() {
         col_types[columns[i]] = columnTypes[i];
     }
 
-    data_manager.addTable(name);
-    data_manager.addColumnTypes(name, col_types);
+    dataManager.addTable(name);
+    dataManager.addColumnTypes(name, col_types);
 }
 
 TypeHints::TableData CreateTablePlan::getResult() const {

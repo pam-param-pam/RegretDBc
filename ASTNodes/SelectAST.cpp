@@ -28,7 +28,7 @@ void SelectAST::performChecks() {
 //    fmt::println("COLUMNS");
 //    fmt::println("{}\n", fmt::join(qualifiedColumns, " "));
 
-    checkWhereExpr(tableNames, whereExpr);
+    if (whereExpr.has_value()) checkWhereExpr(tableNames, whereExpr);
 
     //checking order by:
     for (const auto& [identifier, direction] : orderBy) {

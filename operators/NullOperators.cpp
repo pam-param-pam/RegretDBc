@@ -3,7 +3,7 @@
 
 #include <utility>
 
-////------------ BASE CLASS ------------
+///------------ BASE CLASS ------------
 IsNullCheck::IsNullCheck(std::string columnName)
         : columnName(std::move(columnName)) {}
 
@@ -32,7 +32,7 @@ void IsNullCheck::visitColumns(const std::function<void(std::string&, const std:
 }
 
 
-////------------ IS NULL ------------
+///------------ IS NULL ------------
 ISNULL::ISNULL(std::string columnName)
         : IsNullCheck(std::move(columnName)) {}
 
@@ -40,7 +40,7 @@ bool ISNULL::isNullCheck() const {
     return true;
 }
 
-////------------ IS NOT NULL ------------
+///------------ IS NOT NULL ------------
 ISNOTNULL::ISNOTNULL(std::string columnName)
         : IsNullCheck(std::move(columnName)) {}
 

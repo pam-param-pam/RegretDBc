@@ -1,25 +1,44 @@
 #include "../DataManager.h"
 #include "UpdatePlan.h"
+#include "fmt/base.h"
 
 #include <utility>
+
 
 UpdatePlan::UpdatePlan(const std::shared_ptr<PlanNodeBase> &source, std::string tableName, const std::vector<std::pair<std::string, Literal>>& assignments)
        : source(source), tableName(std::move(tableName)), assignments(assignments) {}
 
 void UpdatePlan::execute() {
-//    source->execute();
-//    auto toDelete = source->getResult();
-//
-//    const auto& originalData = DataManager::getInstance().getTablesData(tableName);
-//
-//    TypeHints::TableData newData;
-//    for (const auto& row : originalData) {
-//        if (std::find(toDelete.begin(), toDelete.end(), row) == toDelete.end()) {
-//            newData.push_back(row);
-//        }
-//    }
-//
-//    DataManager::getInstance().setTablesData(tableName, newData);
+    source->execute();
+    auto toUpdate = source->getResult();
+
+    const auto& originalData = DataManager::getInstance().getTablesData(tableName);
+
+    TypeHints::TableData newData;
+
+    //Speed? What is speed?
+    for (const auto& row : originalData) {
+        bool shouldUpdate = false;
+
+        for (const auto& updateRow : toUpdate) {
+            if (row == updateRow) {
+                shouldUpdate = true;
+                break;
+            }
+        }
+        if (shouldUpdate) {
+            TypeHints::Row updatedRow = row;
+            for (const auto& [column, literal] : assignments) {
+                updatedRow[column] = literal.getValue();
+            }
+            newData.push_back(std::move(updatedRow));
+        } else {
+            newData.push_back(row);
+        }
+    }
+
+    DataManager::getInstance().setTablesData(tableName, newData);
+    DataManager::getInstance().setTablesData(tableName, newData);
 
 }
 

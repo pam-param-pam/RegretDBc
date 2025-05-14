@@ -113,7 +113,7 @@ void ASTNode::checkWhereExpr(const std::vector<std::string>& tableNames, const s
 
         if (literal) {
             auto [tableName, colName] = splitColumn(column);
-            auto columnTypeMap = DataManager::getInstance().getColumnTypesForTable(tableName);
+            const auto& columnTypeMap = DataManager::getInstance().getColumnTypesForTable(tableName);
             checkColumnType(columnTypeMap, column, *literal);
         }
 

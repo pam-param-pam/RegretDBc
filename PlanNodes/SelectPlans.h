@@ -7,7 +7,7 @@
 #include "../TypeHints.h"
 #include "../operators/Operand.h"
 
-////---------------- Table Scan ----------------
+///---------------- Table Scan ----------------
 
 class TableScan : public PlanNodeBase {
 public:
@@ -22,7 +22,7 @@ private:
 };
 
 
-////---------------- Cross Join ----------------
+///---------------- Cross Join ----------------
 
 class CrossJoin : public PlanNodeBase {
 public:
@@ -38,7 +38,7 @@ private:
 
 };
 
-////---------------- Filter ----------------
+///---------------- Filter ----------------
 
 class Filter : public PlanNodeBase {
 public:
@@ -54,7 +54,7 @@ private:
 };
 
 
-////---------------- Project ----------------
+///---------------- Project ----------------
 
 class Project : public PlanNodeBase {
 public:
@@ -69,7 +69,7 @@ private:
 
 };
 
-//////---------------- Sort ----------------
+///---------------- Sort ----------------
 
 class Sort : public PlanNodeBase {
 public:
@@ -84,7 +84,7 @@ private:
 
 };
 
-////---------------- Visualize ----------------
+///---------------- Visualize ----------------
 
 class Visualize : public PlanNodeBase {
 public:

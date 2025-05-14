@@ -1,11 +1,10 @@
 #include <memory>
 #include "ComparisonOperators.h"
-#include "../tokenTypes/Identifier.h"
-////holds_alternative is a such a dumb name for checking type of variant...
-////goofy ah code duplication
+///holds_alternative is a such a dumb name for checking type of a variant...
+///todo: goofy ah code duplication
 
 
-//// ------------ BASE CLASS ------------
+/// ------------ BASE CLASS ------------
 std::optional<ComparisonOperator::Value> ComparisonOperator::resolve(const Row &row) const {
     auto it = row.find(columnName);
     if (it == row.end()) {
@@ -31,7 +30,7 @@ void ComparisonOperator::visitColumns(const std::function<void(std::string&, con
     visitor(columnName, literal);
 }
 
-//// ------------ EQ ------------
+/// ------------ EQ ------------
 
 EQ::EQ(const std::string &column, const Literal &literal)
         : ComparisonOperator(column, literal) {}
@@ -62,7 +61,7 @@ std::string EQ::toString() const {
     return "EQ(" + columnName + ", " + literal.toString() + ")";
 }
 
-//// ------------ NEQ ------------
+/// ------------ NEQ ------------
 
 NEQ::NEQ(const std::string &column, const Literal &literal)
         : ComparisonOperator(column, literal) {}
@@ -93,7 +92,7 @@ std::string NEQ::toString() const {
     return columnName + " != " + literal.toString();
 }
 
-//// ------------ LT ------------
+/// ------------ LT ------------
 
 LT::LT(const std::string &column, const Literal &literal)
         : ComparisonOperator(column, literal) {}
@@ -125,7 +124,7 @@ std::string LT::toString() const {
     return columnName + " < " + literal.toString();
 }
 
-////// ------------ LTE ------------
+/// ------------ LTE ------------
 
 LTE::LTE(const std::string& column, const Literal& literal)
         : ComparisonOperator(column, literal) {}
@@ -156,7 +155,7 @@ std::string LTE::toString() const {
     return columnName + " <= " + literal.toString();
 }
 
-//// ------------ GT ------------
+/// ------------ GT ------------
 
 GT::GT(const std::string& column, const Literal& literal)
         : ComparisonOperator(column, literal) {}
@@ -198,7 +197,7 @@ std::shared_ptr<ComparisonOperator> ComparisonOperator::fromLiteral(const std::s
     throw std::invalid_argument("Unknown comparison operator: " + op);
 }
 
-//// ------------ GTE ------------
+/// ------------ GTE ------------
 
 GTE::GTE(const std::string& column, const Literal& literal)
         : ComparisonOperator(column, literal) {}

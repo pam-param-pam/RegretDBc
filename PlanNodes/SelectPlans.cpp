@@ -9,7 +9,7 @@
 #include <iomanip>
 
 
-////---------------- Table Scan ----------------
+///---------------- Table Scan ----------------
 TableScan::TableScan(std::string table) : table(std::move(table)) {}
 
 void TableScan::execute() {
@@ -24,7 +24,7 @@ TypeHints::TableData TableScan::getResult() const {
     return resultData;
 }
 
-////---------------- Cross Join ----------------
+///---------------- Cross Join ----------------
 CrossJoin::CrossJoin(std::shared_ptr<PlanNodeBase> left, std::shared_ptr<PlanNodeBase> right)
         : left(std::move(left)), right(std::move(right)) {}
 
@@ -52,7 +52,7 @@ TypeHints::TableData CrossJoin::getResult() const {
     return resultData;
 }
 
-////---------------- Filter ----------------
+///---------------- Filter ----------------
 
 Filter::Filter(std::shared_ptr<PlanNodeBase> source, Operand& condition)
         : source(std::move(source)), condition(std::move(condition)) {}
@@ -79,7 +79,7 @@ std::string Filter::toString(int level) const {
            std::string(level, ' ') + "source=" + source->toString(level + 1) + "\n" + std::string(level - 1, ' ') + ")";
 }
 
-////---------------- Project ----------------
+///---------------- Project ----------------
 
 Project::Project(std::shared_ptr<PlanNodeBase> source, const std::vector<std::string>& columns)
         : source(std::move(source)), columns(columns) {}
@@ -118,7 +118,7 @@ std::string Project::toString(int level) const {
 }
 
 
-//////---------------- Sort ----------------
+///---------------- Sort ----------------
 
 Sort::Sort(std::shared_ptr<PlanNodeBase> source, const std::vector<std::pair<std::string, bool>>& orderBy)
         : source(std::move(source)), orderBy(orderBy) {}
@@ -158,7 +158,7 @@ std::string Sort::toString(int level) const {
            std::string(level, ' ') + "source=" + source->toString(level + 1) + "\n" + std::string(level - 1, ' ') + ")";
 }
 
-////---------------- Visualize ----------------
+///---------------- Visualize ----------------
 
 Visualize::Visualize(std::shared_ptr<PlanNodeBase> source) : source(std::move(source)) {}
 

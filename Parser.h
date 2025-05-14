@@ -16,6 +16,7 @@
 #include "ASTNodes/DropAST.h"
 #include "ASTNodes/DeleteAST.h"
 #include "ASTNodes/CreateAST.h"
+#include "ASTNodes/AlterAST.h"
 
 
 class Parser {
@@ -29,8 +30,9 @@ private:
     UpdateAST parseUpdate();
     DeleteAST parseDelete();
     CreateAST parseCreate();
-    DropAST parse_drop();
-//    AlterStmt parse_alter();
+    DropAST parseDrop();
+//    AlterAST parseAlter();
+
 
     Token peek();
     Token advance();
@@ -74,4 +76,6 @@ private:
     Operand parseNot();
 
     Operand parseComparison();
+
+
 };

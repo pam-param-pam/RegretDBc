@@ -9,7 +9,7 @@
 #include "../tokenTypes/Identifier.h"
 
 
-////BASE CLASS
+///BASE CLASS
 class ComparisonOperator {
 public:
     using Row = TypeHints::Row;

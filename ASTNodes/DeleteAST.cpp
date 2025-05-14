@@ -6,7 +6,7 @@ DeleteAST::DeleteAST(Identifier  table, std::optional<Operand> whereExpr)
 
 void DeleteAST::performChecks() {
     tableName = checkTable(table);
-    checkWhereExpr({tableName}, whereExpr);
+    if (whereExpr.has_value()) checkWhereExpr({tableName}, whereExpr);
 }
 
 const std::string& DeleteAST::getTableName() const {

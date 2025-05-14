@@ -4,6 +4,7 @@
 #include "PlanNodes/SelectPlans.h"
 #include "PlanNodes/DeletePlan.h"
 #include "PlanNodes/UpdatePlan.h"
+#include "PlanNodes/DropTablePlan.h"
 
 std::shared_ptr<PlanNodeBase> ExecutionPlanner::plan(const std::shared_ptr<ASTNode> &statement) {
 
@@ -64,25 +65,27 @@ std::shared_ptr<PlanNodeBase> ExecutionPlanner::plan(const std::shared_ptr<ASTNo
 
         return plan;
     }
-//    else if (auto updateAST = std::dynamic_pointer_cast<UpdateAST>(statement)) {
-//        // Step 1: Scan the target table
-//        auto scan = std::make_shared<TableScan>(updateAST->getTableName());
-//
-//        // Step 2: Filter rows using WHERE clause
-//        std::shared_ptr<PlanNodeBase> plan = scan;
-//        if (deleteAST->whereExpr) {
-//            plan = std::make_shared<Filter>(plan, *updateAST->whereExpr);
-//        }
-//
-//        // Step 3: Apply Update operations
-//        plan = std::make_shared<UpdatePlan>(plan, updateAST->getQualifiedAssignments(), updateAST->getTableName());
-//
-//        return plan;
-//    }
-//
-//    else if (auto drop_stmt = std::dynamic_pointer_cast<DropStmt>(statement)) {
-//        return std::make_shared<DropTable>(drop_stmt->table);
-//    }
+    else if (auto updateAST = std::dynamic_pointer_cast<UpdateAST>(statement)) {
+
+        // Step 1: Scan the target table
+        auto scan = std::make_shared<TableScan>(updateAST->getTableName());
+
+        // Step 2: Filter rows using WHERE clause
+        std::shared_ptr<PlanNodeBase> plan = scan;
+
+        if (updateAST->whereExpr) {
+            plan = std::make_shared<Filter>(plan, *updateAST->whereExpr);
+        }
+
+        // Step 3: Apply Update operations
+        plan = std::make_shared<UpdatePlan>(plan, updateAST->getTableName(), updateAST->getQualifiedAssignments());
+
+        return plan;
+    }
+
+    else if (auto dropAST = std::dynamic_pointer_cast<DropAST>(statement)) {
+        return std::make_shared<DropTablePlan>(dropAST->getTableName());
+    }
 //    else if (auto alter_add_stmt = std::dynamic_pointer_cast<AlterAddStmt>(statement)) {
 //        // Handle ALTER ADD logic
 //    }
