@@ -10,7 +10,7 @@ void DropTablePlan::execute() {
 }
 
 TypeHints::TableData DropTablePlan::getResult() const {
-    throw IntegrityError("Do not call getResult() on CreateTablePlan");
+    throw IntegrityError("Do not call getResult() on DropTablePlan");
 }
 
 std::string DropTablePlan::toString(int level) const {
@@ -21,7 +21,3 @@ std::string DropTablePlan::toString(int level) const {
     result += "]\n" + std::string(level, ' ') + ")";
     return result;
 }
-
-
-
-

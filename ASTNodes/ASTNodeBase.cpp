@@ -1,8 +1,6 @@
 #include "ASTNodeBase.h"
-#include "../exceptions/exceptions.h"
-#include "../DataManager.h"
-#include "../tokenTypes/Identifier.h"
 #include <algorithm>
+#include "../utils.h"
 
 
 void ASTNode::setSqlText(const std::string& sql) {
@@ -43,14 +41,6 @@ std::vector<std::string> ASTNode::checkTables(const std::vector<Identifier>& tab
     return seen;
 }
 
-std::pair<std::string, std::string> ASTNode::splitColumn(const std::string& column) {
-    size_t dot_pos = column.find('.');
-    if (dot_pos != std::string::npos) {
-        return { column.substr(0, dot_pos), column.substr(dot_pos + 1) };
-    } else {
-        return { "", column };
-    }
-}
 
 //perhaps work on reference instead? todo
 std::string ASTNode::checkColumn(std::vector<std::string> tables, const std::string& column) {

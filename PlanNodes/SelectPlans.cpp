@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <utility>
 #include <iomanip>
+#include <typeindex>
 
 
 ///---------------- Table Scan ----------------
@@ -54,7 +55,7 @@ TypeHints::TableData CrossJoin::getResult() const {
 
 ///---------------- Filter ----------------
 
-Filter::Filter(std::shared_ptr<PlanNodeBase> source, Operand& condition)
+Filter::Filter(std::shared_ptr<PlanNodeBase> source, Operand condition)
         : source(std::move(source)), condition(std::move(condition)) {}
 
 void Filter::execute() {
@@ -124,27 +125,24 @@ Sort::Sort(std::shared_ptr<PlanNodeBase> source, const std::vector<std::pair<std
         : source(std::move(source)), orderBy(orderBy) {}
 
 void Sort::execute() {
-    source->execute();  // Execute the source PlanNode (get the result data)
-    auto data = source->getResult();  // Get the result data
-    //todo
-//    // Perform sorting based on the orderBy vector
-//    for (const auto& [column, isDescending] : orderBy) {
-//        bool reverse = isDescending;  // Sort in reverse if true (for DESC)
-//
-//        // Sort the data by the column, based on the direction (ascending or descending)
-//        std::sort(data.begin(), data.end(), [&](const TypeHints::Row& a, const TypeHints::Row& b) {
-//            const auto& valA = a.at(column);
-//            const auto& valB = b.at(column);
-//
-//            // Using std::visit to handle all possible types in the variant
-//            return reverse ? std::visit([&](auto&& aVal, auto&& bVal) {
-//                return aVal > bVal;  // Descending order comparison
-//            }, valA, valB)
-//                           : std::visit([&](auto&& aVal, auto&& bVal) {
-//                        return aVal < bVal;  // Ascending order comparison
-//                    }, valA, valB);
-//        });
-//    }
+    source->execute();
+    auto data = source->getResult();
+
+    // Yea I don't remember how this works, but it works so don't touch it
+    std::sort(data.begin(), data.end(), [&](const TypeHints::Row& a, const TypeHints::Row& b) {
+        for (const auto& [column, isDescending] : orderBy) {
+            const Literal& valA = a.at(column);
+            const Literal& valB = b.at(column);
+
+            if (valA == valB) {
+                continue;
+            }
+
+            bool less = valA < valB;
+            return isDescending == !less;
+        }
+        return false;
+    });
 
     resultData = std::move(data);
 }
@@ -188,7 +186,7 @@ void Visualize::visualizeTable() {
     }
 
     for (const auto &row: data) {
-        for (size_t i = 0; i < headers.size(); ++i) {
+        for (auto i = 0; i < headers.size(); ++i) {
             const auto &val = row.at(headers[i]);
             std::string str = Literal(val).toString();
             colWidths[i] = std::max(colWidths[i], str.length());
@@ -205,24 +203,23 @@ void Visualize::visualizeTable() {
 
     auto printRow = [&](const std::vector<std::string> &rowData) {
         std::cout << "| ";
-        for (size_t i = 0; i < rowData.size(); ++i) {
+        for (auto i = 0; i < rowData.size(); ++i) {
             std::cout << std::left << std::setw(colWidths[i]) << rowData[i] << " | ";
         }
         std::cout << "\n";
     };
 
-    std::cout << "\nResult: " << std::endl;
     printDivider();
     printRow(headers);
     printDivider();
 
     for (const auto &row: data) {
-        std::vector<std::string> rowStrs;
-        rowStrs.reserve(headers.size());
+        std::vector<std::string> rowStrings;
+        rowStrings.reserve(headers.size());
         for (const auto &h: headers) {
-            rowStrs.push_back(Literal(row.at(h)).toString());
+            rowStrings.push_back(Literal(row.at(h)).toString());
         }
-        printRow(rowStrs);
+        printRow(rowStrings);
     }
 
     printDivider();

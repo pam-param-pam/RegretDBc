@@ -2,8 +2,6 @@
 #include "fmt/format.h"
 #include "fmt/ranges.h"
 
-
-// Constructor definition
 SelectAST::SelectAST(const std::vector<Identifier> &columns, const std::vector<Identifier> &tables, std::optional<Operand> whereExpr,
                      std::vector<std::pair<Identifier, std::string>> orderBy)
         : columns(columns), tables(tables), whereExpr(std::move(whereExpr)), orderBy(std::move(orderBy)) {
@@ -25,8 +23,6 @@ void SelectAST::performChecks() {
             qualifiedColumns.push_back(checkColumn(tableNames, col.value));
         }
     }
-//    fmt::println("COLUMNS");
-//    fmt::println("{}\n", fmt::join(qualifiedColumns, " "));
 
     if (whereExpr.has_value()) checkWhereExpr(tableNames, whereExpr);
 
@@ -38,7 +34,6 @@ void SelectAST::performChecks() {
 
         qualifiedOrderBy.emplace_back(qualifiedColumn, isDescending);
     }
-
 }
 
 const std::vector<std::string>& SelectAST::getTableNames() const {
@@ -52,7 +47,9 @@ const std::vector<std::string>& SelectAST::getQualifiedColumns() const {
 const std::vector<std::pair<std::string, bool>> &SelectAST::getQualifiedOrderBy() const {
     return qualifiedOrderBy;
 }
-
+const std::optional<Operand> &SelectAST::getWhereExpr() const {
+    return whereExpr;
+}
 std::string SelectAST::repr() const {
     std::vector<std::string> columnReprs;
     columnReprs.reserve(columns.size());

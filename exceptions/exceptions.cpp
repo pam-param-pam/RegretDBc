@@ -1,7 +1,6 @@
 #include <sstream>
 #include "Exceptions.h"
 #include "vector"
-#include "fmt/base.h"
 
 /// RegretDBError
 RegretDBError::RegretDBError(const std::string &msg)
@@ -39,18 +38,10 @@ std::string SQLSyntaxError::getMessage() {
     return message;
 }
 
-void SQLSyntaxError::attachContext(const std::string &sql_stmt, const std::vector<Token> &toks, size_t position) {
-    sql = sql_stmt;
-    tokens = toks;
-    pos = position;
-}
-
-std::string SQLSyntaxError::getPrettyError(const std::string &sql, const std::vector<Token> &tokens, size_t pos, int adjust_pos) {
-    size_t offset = 0;
-    size_t token_length = 1;
+std::string SQLSyntaxError::getPrettyError(const std::string &sql, const std::vector<Token> &tokens, int pos, int adjust_pos) {
+    int offset = 0;
+    int token_length = 1;
     int adjust = 0;
-//    fmt::println("pos {}", pos);
-//    fmt::println("adjust_pos {}", adjust_pos);
 
     if (!tokens.empty()) {
         if (pos + adjust_pos < tokens.size()) {
@@ -70,10 +61,6 @@ std::string SQLSyntaxError::getPrettyError(const std::string &sql, const std::ve
         offset = adjust_pos;
     }
 
-
-//    fmt::println("offset {}", offset);
-//    fmt::println("adjust {}", adjust);
-//    fmt::println("token_length {}", token_length);
 
     std::ostringstream oss;
     oss << sql << "\n";

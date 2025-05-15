@@ -12,13 +12,7 @@
 #include "exceptions/exceptions.h"
 
 #include "PlanNodes/PlanNodeBase.h"
-//#include "PlanNodes/CreatePlanNode.h"
-//#include "PlanNodes/SelectPlanNodes.h"
-//#include "PlanNodes/InsertPlanNode.h"
-//#include "PlanNodes/UpdatePlanNode.h"
-//#include "PlanNodes/DeletePlanNode.h"
-//#include "PlanNodes/DropTablePlanNode.h"
-//
+
 class ExecutionPlanner {
 public:
     std::shared_ptr<PlanNodeBase> plan(const std::shared_ptr<ASTNode>& statement);

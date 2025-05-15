@@ -2,7 +2,6 @@
 
 #include <string>
 #include <vector>
-#include <utility>
 #include "ASTNodeBase.h"
 
 class AlterAST : public ASTNode {

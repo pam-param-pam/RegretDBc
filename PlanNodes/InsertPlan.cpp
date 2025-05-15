@@ -24,7 +24,7 @@ std::string InsertPlan::toString(int level) const {
     result += std::string(level + 1, ' ') + "Table='" + tableName + "',\n";
 
     result += std::string(level + 1, ' ') + "Columns=[";
-    for (size_t i = 0; i < columns.size(); ++i) {
+    for (auto i = 0; i < columns.size(); ++i) {
         result += columns[i];
         if (i < columns.size() - 1) {
             result += ", ";
@@ -33,7 +33,7 @@ std::string InsertPlan::toString(int level) const {
     result += "],\n";
 
     result += std::string(level + 1, ' ') + "Values=[";
-    for (size_t i = 0; i < values.size(); ++i) {
+    for (auto i = 0; i < values.size(); ++i) {
         result += values[i].toString();
         if (i < values.size() - 1) {
             result += ", ";

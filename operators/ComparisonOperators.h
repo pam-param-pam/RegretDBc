@@ -77,4 +77,3 @@ public:
     [[nodiscard]] std::optional<bool> evaluate(const Row& row) const override;
     [[nodiscard]] std::string toString() const override;
 };
-

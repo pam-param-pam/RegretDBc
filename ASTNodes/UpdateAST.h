@@ -10,16 +10,16 @@ class UpdateAST : public ASTNode {
 public:
     UpdateAST(Identifier  table, const std::vector<std::pair<Identifier, Literal>>& assignments, std::optional<Operand> whereExpr);
 
-    Identifier table;
-    std::vector<std::pair<Identifier, Literal>> assignments;
-    std::optional<Operand> whereExpr;
-
     void performChecks() override;
     [[nodiscard]] const std::string &getTableName() const;
     [[nodiscard]] const std::vector<std::pair<std::string, Literal>> &getQualifiedAssignments() const;
+    [[nodiscard]] const std::optional<Operand> &getWhereExpr() const;
 
     [[nodiscard]] std::string repr() const override;
 private:
+    Identifier table;
+    std::vector<std::pair<Identifier, Literal>> assignments;
+    std::optional<Operand> whereExpr;
     std::string tableName;
     std::vector<std::pair<std::string, Literal>> qualifiedAssignments;
 };

@@ -15,10 +15,6 @@ protected:
 };
 
 class SQLSyntaxError : public RegretDBError {
-private:
-    std::string sql;
-    std::vector<Token> tokens;
-    size_t pos = 0;
 
 public:
     [[nodiscard]] const char* what() const noexcept override;
@@ -27,9 +23,7 @@ public:
 
     explicit SQLSyntaxError(const std::string& msg);
 
-    void attachContext(const std::string &sql_stmt, const std::vector<Token> &toks, size_t position);
-
-    std::string getPrettyError(const std::string& sql, const std::vector<Token>& tokens, size_t pos, int adjust_pos = 0);
+    std::string getPrettyError(const std::string& sql, const std::vector<Token>& tokens, int pos, int adjust_pos = 0);
 
 };
 

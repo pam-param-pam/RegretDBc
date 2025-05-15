@@ -1,4 +1,5 @@
 #include "Literal.h"
+#include "../exceptions/exceptions.h"
 
 Literal::Literal(Type type, Value value)
         : type(type), value(std::move(value)) {}
@@ -8,7 +9,7 @@ Literal::Literal(const Value& val) {
         type = Type::TEXT;
         value = std::get<std::string>(val);
     } else if (std::holds_alternative<int>(val)) {
-        type = Type::INTEGER;
+        type = Type::NUMBER;
         value = std::get<int>(val);
     } else if (std::holds_alternative<bool>(val)) {
         type = Type::BOOLEAN;
@@ -22,8 +23,8 @@ Literal::Literal(const Value& val) {
 std::string Literal::toString() const {
     switch (type) {
         case Type::TEXT:
-            return "'" + std::get<std::string>(value) + "'";
-        case Type::INTEGER:
+            return std::get<std::string>(value);
+        case Type::NUMBER:
             return std::to_string(std::get<int>(value));
         case Type::BOOLEAN:
             return std::get<bool>(value) ? "True" : "False";
@@ -41,8 +42,8 @@ std::string Literal::typeToString(Literal::Type type) {
     switch (type) {
         case Type::TEXT:
             return "TEXT";
-        case Type::INTEGER:
-            return "INTEGER";
+        case Type::NUMBER:
+            return "NUMBER";
         case Type::BOOLEAN:
             return "BOOLEAN";
         case Type::NULL_VALUE:
@@ -55,8 +56,8 @@ Literal::Type Literal::getTypeFromValue(const std::string &tokenType) {
     if (tokenType == "TEXT") {
         return Type::TEXT;
     } else if (tokenType == "NUMBER") {
-        return Type::INTEGER;
-    } else if (tokenType == "BOOL") {
+        return Type::NUMBER;
+    } else if (tokenType == "BOOLEAN") {
         return Type::BOOLEAN;
     } else if (tokenType == "NULL") {
         return Type::NULL_VALUE;
@@ -74,4 +75,15 @@ bool Literal::isNull() const {
 }
 bool Literal::operator==(const Literal& other) const {
     return type == other.type && value == other.value;
+}
+bool Literal::operator<(const Literal& other) const {
+    if (isNull() && other.isNull()) return false;
+    if (isNull()) return false;          // NULL is greater, so this is NOT less
+    if (other.isNull()) return true;    // other NULL is greater, so this is less
+
+    if (type != other.type) {
+        return type < other.type;
+    }
+
+    return value < other.getValue();
 }

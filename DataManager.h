@@ -11,12 +11,15 @@ class DataManager {
 public:
 
     static DataManager& getInstance();
+    DataManager(const DataManager&) = delete;
+    DataManager& operator=(const DataManager&) = delete;
 
     bool doesTableExist(const std::string& table_name) const;
 
     std::vector<std::string> getColumnsForTable(const std::string& table_name) const;
     const TypeHints::ColumnTypeMap& getColumnTypesForTable(const std::string& table_name) const;
     const TypeHints::TableData& getTablesData(const std::string& table_name) const;
+    std::vector<std::string> getAllTables() const;
 
     void insertRow(const std::string& table_name, const TypeHints::Row& row);
 
@@ -37,6 +40,4 @@ private:
 
     std::unordered_map<std::string, TypeHints::ColumnTypeMap> columnTypes;
     std::unordered_map<std::string, TypeHints::TableData> tableData;
-
-
 };

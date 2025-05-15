@@ -1,6 +1,5 @@
 #include "Operand.h"
 #include "NullOperators.h"
-#include "fmt/base.h"
 
 Operand::Operand(bool value)
         : type(Type::Boolean), boolValue(value) {}
@@ -66,5 +65,3 @@ void Operand::visitColumns(const std::function<void(std::string &, const std::op
             throw IntegrityError("Unknown operand type in visitColumns.");
     }
 }
-
-

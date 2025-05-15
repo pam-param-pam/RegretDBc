@@ -1,7 +1,17 @@
 #include <iostream>
+#include <algorithm>
 #include "TypeHints.h"
 #include "fmt/base.h"
 #include "DataManager.h"
+
+std::pair<std::string, std::string> splitColumn(const std::string& column) {
+    auto dot_pos = column.find('.');
+    if (dot_pos != std::string::npos) {
+        return { column.substr(0, dot_pos), column.substr(dot_pos + 1) };
+    } else {
+        return { "", column };
+    }
+}
 
 void printRow(const TypeHints::Row& row) {
     std::cout << "{ ";
@@ -12,14 +22,12 @@ void printRow(const TypeHints::Row& row) {
 }
 
 void printTable(TypeHints::TableData data) {
-//    fmt::println("Printing project data ({} rows):", data.size());
 
-    for (size_t rowIdx = 0; rowIdx < data.size(); ++rowIdx) {
+    for (auto rowIdx = 0; rowIdx < data.size(); ++rowIdx) {
         const auto& row = data[rowIdx];
         fmt::print("Row {}:\n", rowIdx);
 
         for (const auto& [key, literal] : row) {
-            Literal::Type type;
 
             fmt::print("  {} = {}\n", key, literal.toString());
         }
@@ -30,7 +38,7 @@ std::string typeToString(Literal::Type type)  {
     switch (type) {
         case Literal::Type::NULL_VALUE: return "NULL";
         case Literal::Type::TEXT: return "TEXT";
-        case Literal::Type::INTEGER: return "INTEGER";
+        case Literal::Type::NUMBER: return "NUMBER";
         case Literal::Type::BOOLEAN: return "BOOLEAN";
         default: return "UNKNOWN";
     }
@@ -43,21 +51,36 @@ void visualizeTableStructure(const std::string& table_name)  {
         return;
     }
 
-    // Get the column types for the table
     const auto& columnTypesMap = dataManager.getColumnTypesForTable(table_name);
 
-    // Print the table name
     fmt::println("Table '{}':", table_name);
     fmt::println("Columns and their types:");
 
-    // Iterate through the columns and print their names and types
     for (const auto& [columnName, columnType] : columnTypesMap) {
-        // Convert the column type to a human-readable string
         std::string typeString = typeToString(columnType);
-
-        // Print the column name and type
         fmt::println("  Column: '{}' | Type: '{}'", columnName, typeString);
     }
 }
 
+///https://stackoverflow.com/questions/216823/how-to-trim-a-stdstring
+void ltrim(std::string &s) {
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
+        return !std::isspace(ch);
+    }));
+}
 
+void rtrim(std::string &s) {
+    s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
+        return !std::isspace(ch);
+    }).base(), s.end());
+}
+
+void trim(std::string &s) {
+    rtrim(s);
+    ltrim(s);
+}
+
+std::string trim_copy(std::string s) {
+    trim(s);
+    return s;
+}

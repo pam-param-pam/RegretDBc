@@ -5,15 +5,13 @@
 #include <vector>
 #include <utility>
 
-class CreateTablePlan : public PlanNodeBase {
+class DumpPlan : public PlanNodeBase {
 public:
-    CreateTablePlan(std::string name, const std::vector<std::string> &columns, const std::vector<Literal::Type> &columnTypes);
+    explicit DumpPlan(std::string filePath);
     void execute() override;
     [[nodiscard]] std::string toString(int level) const override;
     [[nodiscard]] TypeHints::TableData getResult() const override;
 
 private:
-    std::string name;
-    std::vector<std::string> columns;
-    std::vector<Literal::Type> columnTypes;
+    std::string filePath;
 };

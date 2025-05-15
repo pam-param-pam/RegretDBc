@@ -39,5 +39,4 @@ private:
     std::shared_ptr<ComparisonOperator> comparisonOp;
     std::shared_ptr<IsNullCheck> nullOp;
     std::shared_ptr<LogicalOperator> logicalOp;
-
 };

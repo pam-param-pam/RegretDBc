@@ -1,9 +1,9 @@
 #include "Parser.h"
 #include "tokenTypes/Identifier.h"
-#include "fmt/base.h"
 #include "tokenTypes/Literal.h"
 #include "operators/Operand.h"
 #include "ASTNodes/AlterAST.h"
+#include "ASTNodes/DumpLoadAST.h"
 #include <stdexcept>
 
 
@@ -22,35 +22,21 @@ bool parse_boolean(const std::string &token) {
     throw std::invalid_argument("Invalid boolean string: " + token);
 }
 
-// Constructor
-Parser::Parser() : pos(0) {
-    OPERATOR_MAP = {
-            {"=",  "EG"},
-            {"!=", "NE"},
-            {">",  "GT"},
-            {"<",  "LT"},
-            {">=", "GE"},
-            {"<=", "LE"}
-    };
-}
+Parser::Parser() : pos(0) {}
 
-// Helper function to peek at the next token
 Token Parser::peek() {
     if (pos < tokens.size()) {
-//        fmt::print("111111111111\n");
         return tokens[pos];
     } else {
-        return Token("EOF", "", pos);  // Return special EOF token
+        return {"EOF", "", pos};  // Return special EOF token
     }
 }
 
-// Helper function to advance to the next token
 Token Parser::advance() {
     pos++;
     return peek();
 }
 
-// Helper function to expect a specific token (by type or value)
 Token Parser::expect(const std::string &type_or_value) {
     Token token = peek();
 
@@ -62,11 +48,9 @@ Token Parser::expect(const std::string &type_or_value) {
     }
 }
 
-// Main function to parse the SQL statement
 std::unique_ptr<ASTNode> Parser::parse(const std::string &sql_stmt) {
     pos = 0;
     try {
-        // Tokenize the SQL statement
         tokens = tokenizer.tokenize(sql_stmt);
         std::unique_ptr<ASTNode> ptr;
 
@@ -92,7 +76,9 @@ std::unique_ptr<ASTNode> Parser::parse(const std::string &sql_stmt) {
         } else if (token.type == "ALTER") {
             AlterAST stmt = parseAlter();
             ptr = std::make_unique<AlterAST>(std::move(stmt));
-
+        } else if (token.type == "DUMP" || token.type == "LOAD") {
+            DumpLoadAST stmt = parseDumpLoad();
+            ptr = std::make_unique<DumpLoadAST>(std::move(stmt));
         } else {
             throw SQLSyntaxError("Unknown statement start: " + token.value);
         }
@@ -113,13 +99,14 @@ std::unique_ptr<ASTNode> Parser::parse(const std::string &sql_stmt) {
 Literal Parser::parseLiteral() {
     Token token = peek();
 
-    if (token.type == "NUMBER") {
+    if (token.type == "NUMBER_VALUE") {
         advance();
-        return {Literal::Type::INTEGER, std::stoi(token.value)};
-    } else if (token.type == "BOOLEAN") {
+        return {Literal::Type::NUMBER, std::stoi(token.value)};
+    } else if (token.type == "BOOLEAN_VALUE") {
+
         advance();
         return {Literal::Type::BOOLEAN, parse_boolean(token.value)};
-    } else if (token.type == "TEXT") {
+    } else if (token.type == "TEXT_VALUE") {
         advance();
         return {Literal::Type::TEXT, token.value};
     } else if (token.type == "NULL") {
@@ -128,6 +115,29 @@ Literal Parser::parseLiteral() {
     } else {
         throw SQLSyntaxError("Expected literal value, found " + token.toString());
     }
+
+}
+
+Identifier Parser::parseQualifiedColumn() {
+    auto identifier = expect("IDENTIFIER").value;
+    if (peek().type == "DOT") {
+        advance();
+        std::string second_identifier = expect("IDENTIFIER").value;
+        return {Identifier::Type::COLUMN, identifier + "." + second_identifier};
+    }
+    return {Identifier::Type::COLUMN, identifier};
+
+}
+std::vector<Identifier> Parser::parseQualifiedColumns() {
+    std::vector<Identifier> ids;
+
+    ids.push_back(parseQualifiedColumn());
+
+    while (peek().type == "COMMA") {
+        advance();  // Skip comma
+        ids.push_back(parseQualifiedColumn());
+    }
+    return ids;
 
 }
 
@@ -147,17 +157,11 @@ std::vector<Identifier> Parser::parseTables() {
     return parseIdentifierList(Identifier::Type::TABLE);
 }
 
-// Helper method to parse identifiers (columns or tables)
 Identifier Parser::parseIdentifier(Identifier::Type type) {
     Token identifier_token = expect("IDENTIFIER");
 
     std::string identifier = identifier_token.value;
 
-    if (peek().type == "DOT") {
-        advance();
-        std::string second_identifier = expect("IDENTIFIER").value;
-        return {type, identifier + "." + second_identifier};
-    }
     return {type, identifier};
 }
 
@@ -191,14 +195,14 @@ std::vector<Literal> Parser::parseValueList() {
 std::string Parser::parseColumnType() {
     Token peeked = peek();
 
-    for (const auto &type: {"TEXT", "NUMBER", "BOOL"}) {
+    for (const auto &type: {"TEXT", "NUMBER", "BOOLEAN"}) {
         if (peeked.type == type) {
             advance();
             return peeked.type;
         }
     }
 
-    throw SQLSyntaxError("Expected column type (TEXT, NUMBER, BOOL), found " + peeked.value);
+    throw SQLSyntaxError("Expected column type (TEXT, NUMBER, BOOLEAN), found " + peeked.value);
 }
 
 std::vector<std::pair<Identifier, Literal>> Parser::parseAssignments() {
@@ -225,7 +229,7 @@ std::vector<std::pair<Identifier, std::string>> Parser::parseOrderBy() {
     std::vector<std::pair<Identifier, std::string>> orderings;
 
     while (true) {
-        Identifier column = parseColumn();
+        Identifier column = parseQualifiedColumn();
 
         Token directionToken = peek();
         if (directionToken.type != "ASC" && directionToken.type != "DESC") {
@@ -288,13 +292,13 @@ Operand Parser::parseComparison() {
 
     Token token = peek();
 
-    if (token.type == "BOOLEAN") {
+    if (token.type == "BOOLEAN_VALUE") {
         advance();
         bool value = parse_boolean(token.value);
         return Operand(value);
     }
 
-    Identifier left = parseColumn();
+    Identifier left = parseQualifiedColumn();
     Token peeked = peek();
 
     if (peeked.type == "IS") {
@@ -377,7 +381,7 @@ SelectAST Parser::parseSelect() {
         advance();
         columns.emplace_back(Identifier::Type::COLUMN, "*");
     } else {
-        columns = parseColumns();
+        columns = parseQualifiedColumns();
     }
 
     expect("FROM");
@@ -463,8 +467,7 @@ AlterAST Parser::parseAlter() {
         advance();
         expect("COLUMN");
 
-        auto columnName = expect("IDENTIFIER").value;
-        auto column = Identifier(Identifier::Type::COLUMN, columnName);
+        auto column = parseColumn();
 
         std::string dataType = parseColumnType();
 
@@ -474,8 +477,7 @@ AlterAST Parser::parseAlter() {
         advance();
         expect("COLUMN");
 
-        auto columnName = expect("IDENTIFIER").value;
-        auto column = Identifier(Identifier::Type::COLUMN, columnName);
+        auto column = parseColumn();
 
         return {AlterAST::Action::DROP, table, column};
 
@@ -483,8 +485,7 @@ AlterAST Parser::parseAlter() {
         advance();
         expect("COLUMN");
 
-        auto columnName = expect("IDENTIFIER").value;
-        auto column = Identifier(Identifier::Type::COLUMN, columnName);
+        auto column = parseColumn();
 
         std::string newColumnName = expect("IDENTIFIER").value;
 
@@ -494,12 +495,44 @@ AlterAST Parser::parseAlter() {
         advance();
         expect("COLUMN");
 
-        auto columnName = expect("IDENTIFIER").value;
-        auto column = Identifier(Identifier::Type::COLUMN, columnName);
+        auto column = parseColumn();
 
         std::string newType = parseColumnType();
 
         return {AlterAST::Action::MODIFY, table, column, newType};
     }
 
+    throw SQLSyntaxError("Expected ADD, DROP, RENAME or MODIFY. Got: " + peek().value);
+}
+
+DumpLoadAST Parser::parseDumpLoad() {
+    DumpLoadAST::Type type;
+    if (peek().type == "LOAD") {
+        type = DumpLoadAST::Type::LOAD;
+    }
+    else if (peek().type == "DUMP") {
+        type = DumpLoadAST::Type::DUMP;
+    } else {
+        throw SQLSyntaxError("Expected LOAD or DUMP. Instead got: " + peek().value);
+    }
+    advance();
+
+    // Merge tokens into a full path until we hit something that's not part of a file path
+    std::string filePath;
+    bool first = true;
+
+    while (peek().type == "IDENTIFIER" || peek().value == "." || peek().value == "/" || peek().value == "\\" || peek().value == "-" || peek().value == "_" || peek().value == ":") {
+        if (!first) {
+            filePath += "";
+        }
+        filePath += peek().value;
+        advance();
+        first = false;
+    }
+
+    if (filePath.empty()) {
+        throw SQLSyntaxError("Expected file path.");
+    }
+
+    return DumpLoadAST(type, filePath);
 }

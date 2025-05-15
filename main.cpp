@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include "RegretDB.h"
+#include "utils.h"
 
 void printWelcomeBanner() {
     std::cout << R"(
@@ -42,7 +43,7 @@ int main() {
         try {
             engine.executeOrder66(sql);
 
-        } catch (const std::exception& e) {
+        } catch (const std::exception &e) {
             std::cerr << "Error executing SQL: " << e.what() << "\n";
         }
     }

@@ -5,7 +5,6 @@
 
 class DropAST : public ASTNode {
 public:
-    Identifier table;
 
     explicit DropAST(Identifier table);
 
@@ -14,5 +13,7 @@ public:
     [[nodiscard]] const std::string &getTableName() const;
 
 private:
+    Identifier table;
+
     std::string tableName;
 };

@@ -37,6 +37,3 @@ std::string DeletePlan::toString(int level) const {
 
     return result;
 }
-
-
-

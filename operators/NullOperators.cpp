@@ -1,7 +1,4 @@
 #include "NullOperators.h"
-#include "fmt/base.h"
-
-#include <utility>
 
 ///------------ BASE CLASS ------------
 IsNullCheck::IsNullCheck(std::string columnName)

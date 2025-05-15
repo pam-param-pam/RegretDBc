@@ -1,6 +1,5 @@
 #include "DropAST.h"
 
-
 DropAST::DropAST(Identifier table)
         : table(std::move(table)) {}
 
@@ -15,4 +14,3 @@ const std::string& DropAST::getTableName() const {
 std::string DropAST::repr() const {
     return "DropStmt(table=" + table.value + ")";
 }
-

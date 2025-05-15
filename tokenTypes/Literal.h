@@ -12,7 +12,7 @@ class Literal {
 public:
     enum class Type {
         TEXT,
-        INTEGER,
+        NUMBER,
         BOOLEAN,
         NULL_VALUE,
     };
@@ -31,7 +31,7 @@ public:
     static std::string typeToString(Type type);
 
     bool operator==(const Literal& other) const;
-
+    bool operator<(const Literal& other) const;
     [[nodiscard]] bool isNull() const;
 
 private:

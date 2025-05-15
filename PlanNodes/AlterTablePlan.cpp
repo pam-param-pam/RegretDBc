@@ -1,7 +1,5 @@
 #include "AlterTablePlan.h"
-#include "../DataManager.h"
 #include "fmt/core.h"
-#include "../ASTNodes/AlterAST.h"
 #include <algorithm>
 #include <stdexcept>
 

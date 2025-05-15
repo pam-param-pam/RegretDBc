@@ -7,7 +7,6 @@
 #include "exceptions/exceptions.h"
 
 
-
 // Tokenizer class that splits SQL strings into tokens
 class Tokenizer {
 private:
@@ -19,4 +18,3 @@ public:
     Tokenizer();
     std::vector<Token> tokenize(const std::string& sql);
 };
-

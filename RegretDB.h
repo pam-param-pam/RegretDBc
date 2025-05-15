@@ -7,13 +7,18 @@
 
 class RegretDB {
 public:
+
+    RegretDB(const RegretDB&) = delete;
+    RegretDB& operator=(const RegretDB&) = delete;
+    static RegretDB &getInstance();
+
+    void executeOrder66(const std::string& sqlString);  // May the 4th be with you
+
     RegretDB();
 
-    void executeOrder66(const std::string& sql_stmt);  // May the 4th be with you
-
 private:
+
     Parser parser;
     ExecutionPlanner planner;
 
-    void dumpToSQL(const std::string &filename);
 };

@@ -1,7 +1,7 @@
 #include "CreateTablePlan.h"
 #include "../DataManager.h"
 
-CreateTablePlan::CreateTablePlan(std::string name, const std::vector<std::string> &columns, std::vector<Literal::Type> &columnTypes)
+CreateTablePlan::CreateTablePlan(std::string name, const std::vector<std::string> &columns, const std::vector<Literal::Type> &columnTypes)
      : name(std::move(name)), columns(columns), columnTypes(columnTypes) {}
 
 void CreateTablePlan::execute() {
@@ -9,7 +9,7 @@ void CreateTablePlan::execute() {
     TypeHints::ColumnTypeMap colTypes;
 
 
-    for (size_t i = 0; i < columns.size(); ++i) {
+    for (auto i = 0; i < columns.size(); ++i) {
         colTypes[columns[i]] = columnTypes[i];
     }
 

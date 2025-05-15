@@ -5,7 +5,7 @@
 
 Tokenizer::Tokenizer() {
     token_specification = {
-            {"BOOLEAN", R"(\b[Tt][Rr][Uu][Ee]\b|\b[Ff][Aa][Ll][Ss][Ee]\b)"}, // This must be before identifiers
+            {"BOOLEAN_VALUE", R"(\b[Tt][Rr][Uu][Ee]\b|\b[Ff][Aa][Ll][Ss][Ee]\b)"}, // This must be before identifiers
             {"IDENTIFIER", "[A-Za-z_][A-Za-z_0-9]*"},
             {"OP", "<=|>=|!=|=|<|>"},
             {"STAR", "\\*"},
@@ -15,8 +15,8 @@ Tokenizer::Tokenizer() {
             {"SEMI", ";"},
             {"SKIP", R"([ \t\n\r]+)"}, // Skip whitespace
             {"DOT", "\\."},
-            {"NUMBER", R"([-]?\b\d+(?:\.\d*)?)"},
-            {"TEXT", R"('(?:[^']|'')*')"},
+            {"NUMBER_VALUE", R"([-]?\b\d+(?:\.\d*)?)"},
+            {"TEXT_VALUE", R"('(?:[^']|'')*')"},
 //            {"BLOB", "b'([0-9A-Fa-f]+)'|x'([0-9A-Fa-f]+)'"}, // BLOB
             {"MISMATCH", "."} // Any other character
     };
@@ -39,7 +39,8 @@ Tokenizer::Tokenizer() {
             "DROP",
             "ALTER", "ADD", "RENAME", "MODIFY", "COLUMN",
             "AND", "OR", "IS", "NOT", "FALSE", "TRUE",
-            "TEXT", "NUMBER", "BOOL", "NULL",
+            "TEXT", "NUMBER", "BOOLEAN", "NULL",
+            "LOAD", "DUMP",
             // "PRIMARY", "FOREIGN", "KEY", "UNIQUE", "DEFAULT", "CASCADE", "RESTRICT",     //no support for constraints atp
 
     };
@@ -47,7 +48,7 @@ Tokenizer::Tokenizer() {
 
 std::vector<Token> Tokenizer::tokenize(const std::string& sql) {
     std::vector<Token> tokens;
-    size_t pos = 0;
+    int pos = 0;
 
     // Loop over the input SQL string
     while (pos < sql.length()) {
@@ -57,17 +58,6 @@ std::vector<Token> Tokenizer::tokenize(const std::string& sql) {
         if (!std::regex_search(sql.begin() + pos, sql.end(), match, tok_regex, std::regex_constants::match_continuous)) {
             throw SQLSyntaxError("Illegal character at position " + std::to_string(pos));
         }
-
-        // DEBUG:
-//        std::cout << "DEBUG: matched text = '"
-//                  << match.str(0)
-//                  << "' at offset " << match.position(0)
-//                  << ", len " << match.length(0) << "\n";
-//        for (size_t gi = 1; gi < match.size(); ++gi) {
-//            std::cout << "    group[" << gi << "] = '"
-//                      << match.str(gi)
-//                      << "'  matched=" << match[gi].matched << "\n";
-//        }
 
         // Determine which matched token
         for (auto i = 0; i < token_specification.size(); ++i) {

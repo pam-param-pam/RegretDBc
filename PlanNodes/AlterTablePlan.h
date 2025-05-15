@@ -13,7 +13,6 @@ public:
     void execute() override;
 
     [[nodiscard]] TypeHints::TableData getResult() const override;
-
     [[nodiscard]] std::string toString(int level) const override;
 
 private:

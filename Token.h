@@ -6,9 +6,9 @@ class Token {
 public:
     std::string type;
     std::string value;
-    size_t position;
+    int position;
 
-    Token(std::string type, std::string value, size_t position);
+    Token(std::string type, std::string value, int position);
 
     [[nodiscard]] std::string toString() const;
 };

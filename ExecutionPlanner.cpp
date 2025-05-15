@@ -7,15 +7,18 @@
 #include "PlanNodes/DropTablePlan.h"
 #include "ASTNodes/AlterAST.h"
 #include "PlanNodes/AlterTablePlan.h"
+#include "ASTNodes/DumpLoadAST.h"
+#include "PlanNodes/DumpPlan.h"
+#include "PlanNodes/LoadPlan.h"
 
 std::shared_ptr<PlanNodeBase> ExecutionPlanner::plan(const std::shared_ptr<ASTNode> &statement) {
 
     if (auto createAST = std::dynamic_pointer_cast<CreateAST>(statement)) {
-        CreateTablePlan plan = CreateTablePlan(createAST->name, createAST->qualifiedColumns, createAST->columnTypes);
+        CreateTablePlan plan = CreateTablePlan(createAST->getTableName(), createAST->getQualifiedColumns(), createAST->getColumnTypes());
         return std::make_shared<CreateTablePlan>(plan);
 
     } else if (auto insertAST = std::dynamic_pointer_cast<InsertAST>(statement)) {
-        InsertPlan plan = InsertPlan(insertAST->getTableName(), insertAST->getQualifiedColumns(), insertAST->values);
+        InsertPlan plan = InsertPlan(insertAST->getTableName(), insertAST->getQualifiedColumns(), insertAST->getValues());
         return std::make_shared<InsertPlan>(plan);
     }
 
@@ -28,23 +31,23 @@ std::shared_ptr<PlanNodeBase> ExecutionPlanner::plan(const std::shared_ptr<ASTNo
 
         // Step 2: Chain them into CrossJoins
         std::shared_ptr<PlanNodeBase> plan = scans[0];
-        for (size_t i = 1; i < scans.size(); ++i) {
+        for (auto i = 1; i < scans.size(); ++i) {
             plan = std::make_shared<CrossJoin>(plan, scans[i]);
         }
 
         // Step 3: WHERE clause
-        if (selectAST->whereExpr) {
-            plan = std::make_shared<Filter>(plan, *selectAST->whereExpr);
+        if (selectAST->getWhereExpr()) {
+            plan = std::make_shared<Filter>(plan, *selectAST->getWhereExpr());
         }
 
         // Step 4: SELECT columns
         plan = std::make_shared<Project>(plan, selectAST->getQualifiedColumns());
 
-//        // Step 5: ORDER BY
-//        auto orderBy = selectAST->getQualifiedOrderBy();
-//        if (!orderBy.empty()) {
-//            plan = std::make_shared<Sort>(plan, selectAST->getQualifiedOrderBy());
-//        }
+        // Step 5: ORDER BY
+        auto orderBy = selectAST->getQualifiedOrderBy();
+        if (!orderBy.empty()) {
+            plan = std::make_shared<Sort>(plan, selectAST->getQualifiedOrderBy());
+        }
 
         // Step 6: Visualize
         plan = std::make_shared<Visualize>(plan);
@@ -58,8 +61,8 @@ std::shared_ptr<PlanNodeBase> ExecutionPlanner::plan(const std::shared_ptr<ASTNo
 
         // Step 2: Filter rows using WHERE clause
         std::shared_ptr<PlanNodeBase> plan = scan;
-        if (deleteAST->whereExpr) {
-            plan = std::make_shared<Filter>(plan, *deleteAST->whereExpr);
+        if (deleteAST->getWhereExpr()) {
+            plan = std::make_shared<Filter>(plan, *deleteAST->getWhereExpr());
         }
 
         // Step 3: Apply Delete operations
@@ -75,8 +78,8 @@ std::shared_ptr<PlanNodeBase> ExecutionPlanner::plan(const std::shared_ptr<ASTNo
         // Step 2: Filter rows using WHERE clause
         std::shared_ptr<PlanNodeBase> plan = scan;
 
-        if (updateAST->whereExpr) {
-            plan = std::make_shared<Filter>(plan, *updateAST->whereExpr);
+        if (updateAST->getWhereExpr()) {
+            plan = std::make_shared<Filter>(plan, *updateAST->getWhereExpr());
         }
 
         // Step 3: Apply Update operations
@@ -91,8 +94,15 @@ std::shared_ptr<PlanNodeBase> ExecutionPlanner::plan(const std::shared_ptr<ASTNo
     else if (auto alterAST = std::dynamic_pointer_cast<AlterAST>(statement)) {
         return std::make_shared<AlterTablePlan>(alterAST->getAction(), alterAST->getTableName(), alterAST->getQualifiedColumn(), alterAST->getNewValue());
     }
+    else if (auto dumpLoadAST = std::dynamic_pointer_cast<DumpLoadAST>(statement)) {
+        if (dumpLoadAST->getType() == DumpLoadAST::Type::DUMP) {
+            return std::make_shared<DumpPlan>(dumpLoadAST->getFilePath());
+        } else if (dumpLoadAST->getType() == DumpLoadAST::Type::LOAD) {
+            return std::make_shared<LoadPlan>(dumpLoadAST->getFilePath());
+        } else throw RegretDBError("Unexpected dumpLoadAST type in ExecutionPlanner");
+    }
 
     else {
-        throw RegretDBError("Unexpected statement type: ");
+        throw RegretDBError("Unexpected statement type in ExecutionPlanner");
     }
 }

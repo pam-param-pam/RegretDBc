@@ -10,11 +10,11 @@ public:
     void performChecks() override;
     [[nodiscard]] std::string repr() const override;
     [[nodiscard]] const std::string &getTableName() const;
+    [[nodiscard]] const std::optional<Operand> &getWhereExpr() const;
 
-    std::optional<Operand> whereExpr;
 private:
     std::string tableName;
     Identifier table;
-
+    std::optional<Operand> whereExpr;
 
 };

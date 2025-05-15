@@ -29,7 +29,7 @@ const std::vector<std::pair<std::string, Literal>> &UpdateAST::getQualifiedAssig
 
 std::string UpdateAST::repr() const {
     std::string assignmentStr;
-    for (size_t i = 0; i < assignments.size(); ++i) {
+    for (auto i = 0; i < assignments.size(); ++i) {
         assignmentStr += fmt::format("({}, {})", assignments[i].first.value, assignments[i].second.toString());
         if (i < assignments.size() - 1) {
             assignmentStr += ", ";
@@ -40,4 +40,6 @@ std::string UpdateAST::repr() const {
                        whereExpr ? whereExpr->toString() : "None");
 }
 
-
+const std::optional<Operand> &UpdateAST::getWhereExpr() const {
+    return whereExpr;
+}

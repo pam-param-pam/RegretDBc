@@ -28,6 +28,7 @@ void ComparisonOperator::visitColumns(const std::function<void(std::string&, con
     visitor(columnName, literal);
 }
 
+
 /// ------------ EQ ------------
 
 EQ::EQ(const std::string &column, const Literal &literal)
@@ -53,6 +54,7 @@ std::string EQ::toString() const {
     return "EQ(" + columnName + ", " + literal.toString() + ")";
 }
 
+
 /// ------------ NEQ ------------
 
 NEQ::NEQ(const std::string &column, const Literal &literal)
@@ -77,6 +79,7 @@ std::optional<bool> NEQ::evaluate(const Row &row) const {
 std::string NEQ::toString() const {
     return columnName + " != " + literal.toString();
 }
+
 
 /// ------------ LT ------------
 
@@ -107,6 +110,7 @@ std::string LT::toString() const {
     return columnName + " < " + literal.toString();
 }
 
+
 /// ------------ LTE ------------
 
 LTE::LTE(const std::string& column, const Literal& literal)
@@ -134,6 +138,7 @@ std::optional<bool> LTE::evaluate(const Row& row) const {
 std::string LTE::toString() const {
     return columnName + " <= " + literal.toString();
 }
+
 
 /// ------------ GT ------------
 
@@ -173,6 +178,7 @@ std::shared_ptr<ComparisonOperator> ComparisonOperator::fromLiteral(const std::s
 
     throw std::invalid_argument("Unknown comparison operator: " + op);
 }
+
 
 /// ------------ GTE ------------
 

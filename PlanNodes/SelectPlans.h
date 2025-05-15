@@ -42,7 +42,7 @@ private:
 
 class Filter : public PlanNodeBase {
 public:
-    Filter(std::shared_ptr<PlanNodeBase> source, Operand& condition);
+    Filter(std::shared_ptr<PlanNodeBase> source, Operand condition);
     void execute() override;
     [[nodiscard]] std::string toString(int level) const override;
     [[nodiscard]] TypeHints::TableData getResult() const override;
@@ -99,4 +99,3 @@ private:
     std::vector<std::string> headers;
     TypeHints::TableData data;
 };
-

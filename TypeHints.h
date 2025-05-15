@@ -11,5 +11,4 @@ public:
     using Row = std::unordered_map<std::string, Literal>;
     using TableData = std::vector<Row>;
     using ColumnTypeMap = std::unordered_map<std::string, Literal::Type>;
-
 };

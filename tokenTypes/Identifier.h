@@ -19,7 +19,3 @@ public:
 private:
     static std::string typeToString(Type type);
 };
-
-
-
-

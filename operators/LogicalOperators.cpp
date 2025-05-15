@@ -23,7 +23,7 @@ std::string AND::toString() const {
 }
 
 
-// OR implementation
+/// OR
 OR::OR(std::shared_ptr<Operand> left, std::shared_ptr<Operand> right)
         : leftOperand(std::move(left)), rightOperand(std::move(right)) {}
 
@@ -46,7 +46,7 @@ std::string OR::toString() const {
     return "OR(" + leftOperand->toString() + ", " + rightOperand->toString() + ")";
 }
 
-// NOT implementation
+/// NOT
 NOT::NOT(std::shared_ptr<Operand> operand)
         : operand(std::move(operand)) {}
 

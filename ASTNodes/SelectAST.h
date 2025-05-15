@@ -10,7 +10,6 @@
 
 class SelectAST : public ASTNode {
 public:
-    std::optional<Operand> whereExpr;
 
     SelectAST(const std::vector<Identifier>& columns, const std::vector<Identifier>& tables, std::optional<Operand> whereExpr, std::vector<std::pair<Identifier, std::string>> orderBy);
 
@@ -21,13 +20,14 @@ public:
     [[nodiscard]] const std::vector<std::string> &getTableNames() const;
     [[nodiscard]] const std::vector<std::string> &getQualifiedColumns() const;
     [[nodiscard]] const std::vector<std::pair<std::string, bool>> &getQualifiedOrderBy() const;
+    [[nodiscard]] const std::optional<Operand> &getWhereExpr() const;
 
 private:
-    std::vector<std::string> tableNames;
-    std::vector<std::string> qualifiedColumns;
-    std::vector<std::pair<std::string, bool>> qualifiedOrderBy;
     std::vector<Identifier> columns;
     std::vector<Identifier> tables;
     std::vector<std::pair<Identifier, std::string>> orderBy;
+    std::optional<Operand> whereExpr;
+    std::vector<std::string> tableNames;
+    std::vector<std::string> qualifiedColumns;
+    std::vector<std::pair<std::string, bool>> qualifiedOrderBy;
 };
-

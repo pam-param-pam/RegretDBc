@@ -12,7 +12,9 @@ void DeleteAST::performChecks() {
 const std::string& DeleteAST::getTableName() const {
     return tableName;
 }
-
+const std::optional<Operand> &DeleteAST::getWhereExpr() const {
+    return whereExpr;
+}
 std::string DeleteAST::repr() const {
     return "DeleteStmt(table=" + table.value + ", where=" + whereExpr->toString() + ")";
 }

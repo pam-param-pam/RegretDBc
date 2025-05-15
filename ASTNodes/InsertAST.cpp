@@ -1,6 +1,4 @@
-#include <sstream>
 #include "InsertAST.h"
-#include "fmt/ranges.h"
 
 
 InsertAST::InsertAST(Identifier table, const std::vector<Identifier>& columns, const std::vector<Literal>& values)
@@ -20,8 +18,7 @@ void InsertAST::performChecks() {
     }
 
     // Check if the types of values match the expected types for each column
-    for (size_t i = 0; i < qualifiedColumns.size(); ++i) {
-
+    for (auto i = 0; i < qualifiedColumns.size(); ++i) {
         checkColumnType(columnTypeMap, qualifiedColumns[i], values[i]);
 
     }
@@ -35,22 +32,26 @@ const std::vector<std::string>& InsertAST::getQualifiedColumns() const {
     return qualifiedColumns;
 }
 
+const std::vector<Literal> &InsertAST::getValues() const {
+    return values;
+}
+
 std::string InsertAST::repr() const {
-    std::ostringstream ss;
-    ss << "InsertStmt(table=" << table.value << ", columns=[";
+    std::string result = "InsertStmt(table=" + table.value + ", columns=[";
 
-    for (size_t i = 0; i < columns.size(); ++i) {
-        ss << columns[i].value;
-        if (i < columns.size() - 1) ss << ", ";
+    for (auto i = 0; i < columns.size(); ++i) {
+        result += columns[i].value;
+        if (i < columns.size() - 1)
+            result += ", ";
+    }
+    result += "], values=[";
+
+    for (auto i = 0; i < values.size(); ++i) {
+        result += values[i].toString();
+        if (i < values.size() - 1)
+            result += ", ";
     }
 
-    ss << "], values=[";
-
-    for (size_t i = 0; i < values.size(); ++i) {
-        ss << values[i].toString();
-        if (i < values.size() - 1) ss << ", ";
-    }
-
-    ss << "])";
-    return ss.str();
+    result += "])";
+    return result;
 }

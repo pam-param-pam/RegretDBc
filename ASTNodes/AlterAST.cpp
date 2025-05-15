@@ -71,6 +71,3 @@ std::string AlterAST::repr() const {
     std::string repr = fmt::format("AlterStmt(table={}, action={}, column={}, new_value={})", table.value, actionToString(action), column.value, newValue);
     return repr;
 }
-
-
-

@@ -17,6 +17,7 @@
 #include "ASTNodes/DeleteAST.h"
 #include "ASTNodes/CreateAST.h"
 #include "ASTNodes/AlterAST.h"
+#include "ASTNodes/DumpLoadAST.h"
 
 
 class Parser {
@@ -27,7 +28,7 @@ public:
 private:
     Tokenizer tokenizer;
     std::vector<Token> tokens;
-    size_t pos = 0;
+    int pos = 0;
     std::string sql;
     std::map<std::string, std::string> OPERATOR_MAP;
 
@@ -38,6 +39,7 @@ private:
     CreateAST parseCreate();
     DropAST parseDrop();
     AlterAST parseAlter();
+    DumpLoadAST parseDumpLoad();
 
 
     Token peek();
@@ -76,4 +78,7 @@ private:
 
     Operand parseComparison();
 
+    Identifier parseQualifiedColumn();
+
+    std::vector<Identifier> parseQualifiedColumns();
 };
