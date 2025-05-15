@@ -47,13 +47,23 @@ TypeHints::TableData UpdatePlan::getResult() const {
 }
 
 std::string UpdatePlan::toString(int level) const {
-    std::string result = "UpdatePlan(\n"; //todo assignennts
+    std::string indent(level + 1, ' ');
+    std::string result = "UpdatePlan(\n";
 
-    result += std::string(level + 1, ' ') + "Table='" + tableName + "',\n";
+    result += indent + "Table='" + tableName + "',\n";
 
-    result += std::string(level + 1, ' ') + "Source=" + source->toString(level + 2) + "\n";
+    result += indent + "Assignments=[";
+    for (size_t i = 0; i < assignments.size(); ++i) {
+        const auto& [column, literal] = assignments[i];
+        result += column + "=" + literal.toString();
+        if (i < assignments.size() - 1) {
+            result += ", ";
+        }
+    }
+    result += "],\n";
+
+    result += indent + "Source=" + source->toString(level + 2) + "\n";
 
     result += std::string(level, ' ') + ")";
-
     return result;
 }

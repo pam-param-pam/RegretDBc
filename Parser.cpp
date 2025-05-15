@@ -317,7 +317,7 @@ Operand Parser::parseComparison() {
         throw SQLSyntaxError("Expected comparison operator, found " + peeked.toString());
     }
 
-    std::string op = peeked.type;
+    std::string op = peeked.value;
     advance(); // consume operator
 
     Literal rightLiteral = parseLiteral();

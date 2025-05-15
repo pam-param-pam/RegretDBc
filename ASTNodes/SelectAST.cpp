@@ -10,7 +10,6 @@ SelectAST::SelectAST(const std::vector<Identifier> &columns, const std::vector<I
 void SelectAST::performChecks() {
     tableNames = checkTables(tables);
 
-
     for (const auto& col : columns) {
         if (col.value == "*") {
             for (const auto& table : tableNames) {
@@ -23,6 +22,8 @@ void SelectAST::performChecks() {
             qualifiedColumns.push_back(checkColumn(tableNames, col.value));
         }
     }
+    //reverse to match user's order in select
+    std::reverse(qualifiedColumns.begin(), qualifiedColumns.end());
 
     if (whereExpr.has_value()) checkWhereExpr(tableNames, whereExpr);
 

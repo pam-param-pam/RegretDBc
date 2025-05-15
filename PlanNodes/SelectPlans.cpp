@@ -1,4 +1,3 @@
-// PlanNodes.cpp
 #include "PlanNodeBase.h"
 #include "SelectPlans.h"
 #include "../DataManager.h"
@@ -7,7 +6,6 @@
 #include <algorithm>
 #include <utility>
 #include <iomanip>
-#include <typeindex>
 
 
 ///---------------- Table Scan ----------------
@@ -65,7 +63,6 @@ void Filter::execute() {
     for (const auto& row : data) {
         auto result = condition.evaluate(row);
         if (result.value_or(false)) {
-//            fmt::println("Filter TRUEEEE");
             resultData.push_back(row);
         }
     }
@@ -181,48 +178,55 @@ void Visualize::visualizeTable() {
     }
 
     std::vector<size_t> colWidths(headers.size(), 0);
-    for (auto i = 0; i < headers.size(); ++i) {
+    for (size_t i = 0; i < headers.size(); ++i) {
         colWidths[i] = headers[i].length();
     }
 
-    for (const auto &row: data) {
-        for (auto i = 0; i < headers.size(); ++i) {
-            const auto &val = row.at(headers[i]);
+    for (const auto& row : data) {
+        for (size_t i = 0; i < headers.size(); ++i) {
+            const auto& val = row.at(headers[i]);
             std::string str = Literal(val).toString();
             colWidths[i] = std::max(colWidths[i], str.length());
         }
     }
 
+    std::ostringstream buffer;
+
     auto printDivider = [&]() {
-        std::cout << "+";
-        for (size_t width: colWidths) {
-            std::cout << std::string(width + 2, '-') << "+";
+        buffer << "+";
+        for (size_t width : colWidths) {
+            buffer << std::string(width + 2, '-') << "+";
         }
-        std::cout << "\n";
+        buffer << "\n";
     };
 
-    auto printRow = [&](const std::vector<std::string> &rowData) {
-        std::cout << "| ";
-        for (auto i = 0; i < rowData.size(); ++i) {
-            std::cout << std::left << std::setw(colWidths[i]) << rowData[i] << " | ";
+    auto printRow = [&](const std::vector<std::string>& rowData) {
+        buffer << "| ";
+        for (size_t i = 0; i < rowData.size(); ++i) {
+            buffer << std::left << std::setw(colWidths[i]) << rowData[i] << " | ";
         }
-        std::cout << "\n";
+        buffer << "\n";
     };
 
     printDivider();
     printRow(headers);
     printDivider();
 
-    for (const auto &row: data) {
+    for (const auto& row : data) {
         std::vector<std::string> rowStrings;
         rowStrings.reserve(headers.size());
-        for (const auto &h: headers) {
+        for (const auto& h : headers) {
             rowStrings.push_back(Literal(row.at(h)).toString());
         }
         printRow(rowStrings);
     }
 
     printDivider();
+
+    buffer << "\n" << data.size() << " row" << (data.size() != 1 ? "s" : "") << " returned.\n";
+
+    // Flush buffered output once
+    std::cout << buffer.str();
 }
 
 

@@ -42,7 +42,6 @@ std::vector<std::string> ASTNode::checkTables(const std::vector<Identifier>& tab
 }
 
 
-//perhaps work on reference instead? todo
 std::string ASTNode::checkColumn(std::vector<std::string> tables, const std::string& column) {
     auto [table_name, col_name] = splitColumn(column);
     bool flag = false;

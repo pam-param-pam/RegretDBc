@@ -35,7 +35,6 @@ int main() {
         std::cout << "> ";
         std::getline(std::cin, sql);
 
-        // Exit condition
         if (sql == "exit" || sql == "quit") {
             break;
         }
