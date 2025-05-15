@@ -65,13 +65,11 @@ Token Parser::expect(const std::string &type_or_value) {
 // Main function to parse the SQL statement
 std::unique_ptr<ASTNode> Parser::parse(const std::string &sql_stmt) {
     pos = 0;
-    sql = sql_stmt;
     try {
         // Tokenize the SQL statement
         tokens = tokenizer.tokenize(sql_stmt);
         std::unique_ptr<ASTNode> ptr;
 
-        // Check for SQL statement type
         Token token = peek();
         if (token.type == "CREATE") {
             CreateAST stmt = parseCreate();
@@ -92,15 +90,8 @@ std::unique_ptr<ASTNode> Parser::parse(const std::string &sql_stmt) {
             DropAST stmt = parseDrop();
             ptr = std::make_unique<DropAST>(std::move(stmt));
         } else if (token.type == "ALTER") {
-//            expect("TABLE");
-//            auto table = parseTable();
-//            if (peek().type == "ADD") {
-//                AlterAddAST = parseAlterAdd(table);
-//            } else if (peek().type == "ADD") {
-//
-//            } else if (peek().type == "ADD") {
-//
-//            }
+            AlterAST stmt = parseAlter();
+            ptr = std::make_unique<AlterAST>(std::move(stmt));
 
         } else {
             throw SQLSyntaxError("Unknown statement start: " + token.value);
@@ -201,9 +192,9 @@ std::string Parser::parseColumnType() {
     Token peeked = peek();
 
     for (const auto &type: {"TEXT", "NUMBER", "BOOL"}) {
-        if (peeked.value == type) {
+        if (peeked.type == type) {
             advance();
-            return peeked.value;
+            return peeked.type;
         }
     }
 
@@ -322,7 +313,7 @@ Operand Parser::parseComparison() {
         throw SQLSyntaxError("Expected comparison operator, found " + peeked.toString());
     }
 
-    std::string op = peeked.value;
+    std::string op = peeked.type;
     advance(); // consume operator
 
     Literal rightLiteral = parseLiteral();
@@ -455,22 +446,60 @@ DropAST Parser::parseDrop() {
 }
 
 
-//AlterAddAST Parser::parseAlterAdd(const Identifier& table) {
-//    ///ALTER TABLE <table_name> [ADD COLUMN <column_name> <data_type> ]
-//    expect("ADD");
-//
-//}
-//
-//AlterDropAST Parser::parseAlterDrop(const Identifier& table) {
-//    ///ALTER TABLE <table_name> | [DROP COLUMN <column_name>]
-//
-//}
-//AlterRenameAST Parser::parseAlterDrop(Identifier table) {
-//    ///ALTER TABLE <table_name> | [RENAME COLUMN <old_name> TO <new_name>]
-//
-//}
-//AlterModifyAST Parser::parseAlterDrop(Identifier table) {
-//    ///ALTER TABLE <table_name> | [MODIFY COLUMN <column_name> <new_data_type>
-//
-//
-//}
+AlterAST Parser::parseAlter() {
+    ///ALTER TABLE <table_name>  [ADD COLUMN <column_name> <data_type>]
+    ///                        | [DROP COLUMN <column_name>]
+    ///                        | [RENAME COLUMN <old_name> TO <new_name>]
+    ///                        | [MODIFY COLUMN <column_name> <new_data_type>
+
+    expect("ALTER");
+    expect("TABLE");
+
+    Identifier table = parseTable();
+
+
+    // Check what operation to perform
+    if (peek().type == "ADD") {
+        advance();
+        expect("COLUMN");
+
+        auto columnName = expect("IDENTIFIER").value;
+        auto column = Identifier(Identifier::Type::COLUMN, columnName);
+
+        std::string dataType = parseColumnType();
+
+        return {AlterAST::Action::ADD, table, column, dataType};
+
+    } else if (peek().type == "DROP") {
+        advance();
+        expect("COLUMN");
+
+        auto columnName = expect("IDENTIFIER").value;
+        auto column = Identifier(Identifier::Type::COLUMN, columnName);
+
+        return {AlterAST::Action::DROP, table, column};
+
+    } else if (peek().type == "RENAME") {
+        advance();
+        expect("COLUMN");
+
+        auto columnName = expect("IDENTIFIER").value;
+        auto column = Identifier(Identifier::Type::COLUMN, columnName);
+
+        std::string newColumnName = expect("IDENTIFIER").value;
+
+        return {AlterAST::Action::RENAME, table, column, newColumnName};
+
+    } else if (peek().type == "MODIFY") {
+        advance();
+        expect("COLUMN");
+
+        auto columnName = expect("IDENTIFIER").value;
+        auto column = Identifier(Identifier::Type::COLUMN, columnName);
+
+        std::string newType = parseColumnType();
+
+        return {AlterAST::Action::MODIFY, table, column, newType};
+    }
+
+}

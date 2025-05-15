@@ -11,7 +11,7 @@ public:
         TABLE
     };
 
-    Identifier(Type type, std::string  value);
+    Identifier(Type type, std::string value);
     [[nodiscard]] std::string toString() const;
     Type type;
     std::string value;

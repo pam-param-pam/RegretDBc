@@ -68,3 +68,10 @@ Literal::Type Literal::getTypeFromValue(const std::string &tokenType) {
 Literal::Type Literal::getType() const {
     return type;
 }
+
+bool Literal::isNull() const {
+    return type==Type::NULL_VALUE;
+}
+bool Literal::operator==(const Literal& other) const {
+    return type == other.type && value == other.value;
+}

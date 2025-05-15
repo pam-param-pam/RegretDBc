@@ -7,8 +7,8 @@ void InsertPlan::execute() {
     DataManager& dataManager = DataManager::getInstance();
 
     TypeHints::Row row;
-    for (size_t i = 0; i < columns.size(); ++i) {
-        row[columns[i]] = values[i].getValue();
+    for (auto i = 0; i < columns.size(); ++i) {
+        row[columns[i]] = values[i];
     }
 
     dataManager.insertRow(tableName, row);

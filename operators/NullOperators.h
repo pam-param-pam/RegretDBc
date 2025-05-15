@@ -12,7 +12,6 @@
 class IsNullCheck {
 public:
     using Row = TypeHints::Row;
-    using Value = TypeHints::Value;
 
     explicit IsNullCheck(std::string columnName);
 
@@ -23,7 +22,7 @@ public:
 protected:
     std::string columnName;
 
-    [[nodiscard]] Value resolve(const Row& row) const;
+    [[nodiscard]] Literal resolve(const Row& row) const;
     [[nodiscard]] virtual bool isNullCheck() const = 0;
 };
 

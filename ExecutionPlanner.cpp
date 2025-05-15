@@ -5,6 +5,8 @@
 #include "PlanNodes/DeletePlan.h"
 #include "PlanNodes/UpdatePlan.h"
 #include "PlanNodes/DropTablePlan.h"
+#include "ASTNodes/AlterAST.h"
+#include "PlanNodes/AlterTablePlan.h"
 
 std::shared_ptr<PlanNodeBase> ExecutionPlanner::plan(const std::shared_ptr<ASTNode> &statement) {
 
@@ -86,18 +88,10 @@ std::shared_ptr<PlanNodeBase> ExecutionPlanner::plan(const std::shared_ptr<ASTNo
     else if (auto dropAST = std::dynamic_pointer_cast<DropAST>(statement)) {
         return std::make_shared<DropTablePlan>(dropAST->getTableName());
     }
-//    else if (auto alter_add_stmt = std::dynamic_pointer_cast<AlterAddStmt>(statement)) {
-//        // Handle ALTER ADD logic
-//    }
-//    else if (auto alter_modify_stmt = std::dynamic_pointer_cast<AlterModifyStmt>(statement)) {
-//        // Handle ALTER MODIFY logic
-//    }
-//    else if (auto alter_rename_stmt = std::dynamic_pointer_cast<AlterRenameStmt>(statement)) {
-//        // Handle ALTER RENAME logic
-//    }
-//    else if (auto alter_drop_stmt = std::dynamic_pointer_cast<AlterDropStmt>(statement)) {
-//        // Handle ALTER DROP logic
-//    }
+    else if (auto alterAST = std::dynamic_pointer_cast<AlterAST>(statement)) {
+        return std::make_shared<AlterTablePlan>(alterAST->getAction(), alterAST->getTableName(), alterAST->getQualifiedColumn(), alterAST->getNewValue());
+    }
+
     else {
         throw RegretDBError("Unexpected statement type: ");
     }

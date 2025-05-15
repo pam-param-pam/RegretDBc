@@ -21,12 +21,16 @@ public:
     void insertRow(const std::string& table_name, const TypeHints::Row& row);
 
     void addTable(const std::string& table_name);
-    void addColumnTypes(const std::string& table_name, const TypeHints::ColumnTypeMap& col_types);
+    void addColumnTypes(const std::string& tableName, const TypeHints::ColumnTypeMap& colTypes);
     void dropTable(const std::string& table_name);
 
-    void printTable(TypeHints::TableData data);
-
     void setTablesData(const std::string &table_name, const TypeHints::TableData &newData);
+
+    void addColumn(const std::string& tableName, const std::string& columnName, Literal::Type columnType);
+    void dropColumn(const std::string& tableName, const std::string& columnName);
+    void renameColumn(const std::string& tableName, const std::string& oldName, const std::string& newName);
+    void modifyColumnType(const std::string& tableName, const std::string& columnName, Literal::Type newType);
+
 
 private:
     DataManager() = default;

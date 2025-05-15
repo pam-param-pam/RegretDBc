@@ -1,35 +1,52 @@
-#include "Token.h"
+#include <iostream>
+#include <string>
 #include "RegretDB.h"
-#include "utils.h"
+
+void printWelcomeBanner() {
+    std::cout << R"(
+=============================================================
+
+           ______                   _  ____________
+          | ___ \                  | | |  _  \ ___ \
+          | |_/ /___  __ _ _ __ ___| |_| | | | |_/ /
+          |    // _ \/ _` | '__/ _ \ __| | | | ___ \
+          | |\ \  __/ (_| | | |  __/ |_| |/ /| |_/ /
+          \_| \_\___|\__, |_|  \___|\__|___/ \____/
+                      __/ |
+                     |___/
+
+                   Welcome to RegretDB
+         Enter SQL commands or type exit to exit.
+                        ~Pam
+
+=============================================================
+
+)";
+}
 
 int main() {
+    RegretDB engine;
+    printWelcomeBanner();
+    std::cout << "Enter SQL commands (type 'exit' to quit):\n";
 
-    RegretDB engine = RegretDB();
     std::string sql;
-    sql = "CREATE TABLE users (id NUMBER, name TEXT, isCool BOOL)";
-    engine.executeOrder66(sql);
+    while (true) {
+        std::cout << "> ";
+        std::getline(std::cin, sql);
 
-    sql = "INSERT INTO users (name, id, isCool) VALUES ('Ash', 1, False)";
-    engine.executeOrder66(sql);
+        // Exit condition
+        if (sql == "exit" || sql == "quit") {
+            break;
+        }
 
-    sql = "INSERT INTO users (name, id, isCool) VALUES ('Ashley', 2, NULL)";
-    engine.executeOrder66(sql);
+        try {
+            engine.executeOrder66(sql);
 
-    sql = "DELETE FROM users where isCool is null";
-    engine.executeOrder66(sql);
+        } catch (const std::exception& e) {
+            std::cerr << "Error executing SQL: " << e.what() << "\n";
+        }
+    }
 
-    sql = "UPDATE users set isCool=null where true";
-    engine.executeOrder66(sql);
-
-    sql = "DROP TABLE users";
-    engine.executeOrder66(sql);
-
-//    sql = "SELECT * FROM users";   //where isCool is not null ORDER BY name asc
-//    engine.executeOrder66(sql);
-
-    sql = "CREATE TABLE users (id NUMBER, name TEXT, isCool BOOL)";
-    engine.executeOrder66(sql);
-
-    visualizeTableStructure("users");
-
+    std::cout << "Exiting...\n";
+    return 0;
 }

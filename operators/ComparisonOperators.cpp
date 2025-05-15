@@ -1,11 +1,10 @@
 #include <memory>
 #include "ComparisonOperators.h"
-///holds_alternative is a such a dumb name for checking type of a variant...
-///todo: goofy ah code duplication
+
 
 
 /// ------------ BASE CLASS ------------
-std::optional<ComparisonOperator::Value> ComparisonOperator::resolve(const Row &row) const {
+std::optional<Literal> ComparisonOperator::resolve(const Row &row) const {
     auto it = row.find(columnName);
     if (it == row.end()) {
         return std::nullopt;
@@ -13,18 +12,17 @@ std::optional<ComparisonOperator::Value> ComparisonOperator::resolve(const Row &
     return it->second;
 }
 
-std::pair<TypeHints::Value, TypeHints::Value> ComparisonOperator::resolveAndUnpackOrThrow(const Row &row) const {
+std::pair<Literal, Literal> ComparisonOperator::resolveAndUnpackOrThrow(const Row &row) const {
     auto maybeValue = resolve(row);
     if (!maybeValue.has_value())
         throw IntegrityError("Unexpected: Column '" + columnName + "' not found in row");
 
     const auto &val = maybeValue.value();
-    const auto &lit = literal.getValue();
 
-    if (val.index() != lit.index() && literal.getType() != Literal::Type::NULL_VALUE)
+    if (literal.getType() != val.getType() && literal.getType() != Literal::Type::NULL_VALUE)
         throw IntegrityError("Unexpected: Type mismatch between column '" + columnName + "' and literal");
 
-    return {val, lit};
+    return {val, literal};
 }
 void ComparisonOperator::visitColumns(const std::function<void(std::string&, const std::optional<Literal>&)>& visitor) {
     visitor(columnName, literal);
@@ -41,16 +39,10 @@ std::optional<bool> EQ::evaluate(const Row &row) const {
 
     const auto &[val, litVal] = values;
 
-    if (std::holds_alternative<int>(val) && std::holds_alternative<int>(litVal)) {
-        return std::get<int>(val) == std::get<int>(litVal);
+    if (val.getType() == litVal.getType()) {
+        return val.getValue() == litVal.getValue();
     }
-    if (std::holds_alternative<std::string>(val) && std::holds_alternative<std::string>(litVal)) {
-        return std::get<std::string>(val) == std::get<std::string>(litVal);
-    }
-    if (std::holds_alternative<bool>(val) && std::holds_alternative<bool>(litVal)) {
-        return std::get<bool>(val) == std::get<bool>(litVal);
-    }
-    if (std::holds_alternative<std::monostate>(val) || std::holds_alternative<std::monostate>(litVal)) {
+    if (val.isNull() || litVal.isNull()) {
         return std::nullopt;
     }
     throw IntegrityError("Unexpected: unable to match values in EQ");
@@ -72,16 +64,10 @@ std::optional<bool> NEQ::evaluate(const Row &row) const {
 
     const auto &[val, litVal] = values;
 
-    if (std::holds_alternative<int>(val) && std::holds_alternative<int>(litVal)) {
-        return std::get<int>(val) != std::get<int>(litVal);
+    if (val.getType() == litVal.getType()) {
+        return val.getValue() != litVal.getValue();
     }
-    if (std::holds_alternative<std::string>(val) && std::holds_alternative<std::string>(litVal)) {
-        return std::get<std::string>(val) != std::get<std::string>(litVal);
-    }
-    if (std::holds_alternative<bool>(val) && std::holds_alternative<bool>(litVal)) {
-        return std::get<bool>(val) == std::get<bool>(litVal);
-    }
-    if (std::holds_alternative<std::monostate>(val) || std::holds_alternative<std::monostate>(litVal)) {
+    if (val.isNull() || litVal.isNull()) {
         return std::nullopt;
     }
 
@@ -107,13 +93,10 @@ std::optional<bool> LT::evaluate(const Row &row) const {
 
     const auto &[val, litVal] = values;
 
-    if (std::holds_alternative<int>(val) && std::holds_alternative<int>(litVal)) {
-        return std::get<int>(val) < std::get<int>(litVal);
+    if (val.getType() == litVal.getType()) {
+        return val.getValue() < litVal.getValue();
     }
-    if (std::holds_alternative<std::string>(val) && std::holds_alternative<std::string>(litVal)) {
-        return std::get<std::string>(val) < std::get<std::string>(litVal);
-    }
-    if (std::holds_alternative<std::monostate>(val) || std::holds_alternative<std::monostate>(litVal)) {
+    if (val.isNull() || litVal.isNull()) {
         return std::nullopt;
     }
 
@@ -138,13 +121,10 @@ std::optional<bool> LTE::evaluate(const Row& row) const {
 
     const auto &[val, litVal] = values;
 
-    if (std::holds_alternative<int>(val) && std::holds_alternative<int>(litVal)) {
-        return std::get<int>(val) <= std::get<int>(litVal);
+    if (val.getType() == litVal.getType()) {
+        return val.getValue() <= litVal.getValue();
     }
-    if (std::holds_alternative<std::string>(val) && std::holds_alternative<std::string>(litVal)) {
-        return std::get<std::string>(val) <= std::get<std::string>(litVal);
-    }
-    if (std::holds_alternative<std::monostate>(val) || std::holds_alternative<std::monostate>(litVal)) {
+    if (val.isNull() || litVal.isNull()) {
         return std::nullopt;
     }
 
@@ -169,13 +149,10 @@ std::optional<bool> GT::evaluate(const Row& row) const {
 
     const auto &[val, litVal] = values;
 
-    if (std::holds_alternative<int>(val) && std::holds_alternative<int>(litVal)) {
-        return std::get<int>(val) > std::get<int>(litVal);
+    if (val.getType() == litVal.getType()) {
+        return val.getValue() > litVal.getValue();
     }
-    if (std::holds_alternative<std::string>(val) && std::holds_alternative<std::string>(litVal)) {
-        return std::get<std::string>(val) > std::get<std::string>(litVal);
-    }
-    if (std::holds_alternative<std::monostate>(val) || std::holds_alternative<std::monostate>(litVal)) {
+    if (val.isNull() || litVal.isNull()) {
         return std::nullopt;
     }
 
@@ -211,13 +188,10 @@ std::optional<bool> GTE::evaluate(const Row& row) const {
 
     const auto &[val, litVal] = values;
 
-    if (std::holds_alternative<int>(val) && std::holds_alternative<int>(litVal)) {
-        return std::get<int>(val) >= std::get<int>(litVal);
+    if (val.getType() == litVal.getType()) {
+        return val.getValue() >= litVal.getValue();
     }
-    if (std::holds_alternative<std::string>(val) && std::holds_alternative<std::string>(litVal)) {
-        return std::get<std::string>(val) >= std::get<std::string>(litVal);
-    }
-    if (std::holds_alternative<std::monostate>(val) || std::holds_alternative<std::monostate>(litVal)) {
+    if (val.isNull() || litVal.isNull()) {
         return std::nullopt;
     }
 

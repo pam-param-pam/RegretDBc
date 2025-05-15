@@ -12,29 +12,16 @@ void printRow(const TypeHints::Row& row) {
 }
 
 void printTable(TypeHints::TableData data) {
-    fmt::println("Printing project data ({} rows):", data.size());
+//    fmt::println("Printing project data ({} rows):", data.size());
 
     for (size_t rowIdx = 0; rowIdx < data.size(); ++rowIdx) {
         const auto& row = data[rowIdx];
         fmt::print("Row {}:\n", rowIdx);
 
-        for (const auto& [key, val] : row) {
+        for (const auto& [key, literal] : row) {
             Literal::Type type;
 
-            if (std::holds_alternative<std::monostate>(val)) {
-                type = Literal::Type::NULL_VALUE;
-            } else if (std::holds_alternative<std::string>(val)) {
-                type = Literal::Type::TEXT;
-            } else if (std::holds_alternative<int>(val)) {
-                type = Literal::Type::INTEGER;
-            } else if (std::holds_alternative<bool>(val)) {
-                type = Literal::Type::BOOLEAN;
-            } else {
-                throw std::runtime_error("Unsupported variant type");
-            }
-
-            Literal lit(type, val);
-            fmt::print("  {} = {}\n", key, lit.toString());
+            fmt::print("  {} = {}\n", key, literal.toString());
         }
     }
 }

@@ -24,7 +24,8 @@ protected:
     void checkWhereExpr(const std::vector<std::string> &tableNames, const std::optional<Operand> &whereExpr);
 
 public:
-    ASTNode();
+    ASTNode() = default;
+
     virtual ~ASTNode() = default;
 
     void setSqlText(const std::string& sql);

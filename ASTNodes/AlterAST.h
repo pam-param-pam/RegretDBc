@@ -1,18 +1,38 @@
-//#pragma once
-//
-//#include <string>
-//#include <vector>
-//#include <utility>
-//#include "ASTNodeBase.h"
-//
-//class AlterAST : public ASTNode {
-//public:
-//    AlterAST(Identifier table, std::string action, Identifier column, std::string dataTypeOrName);
-//
-//
-//
-//    void performChecks() override;
-//    [[nodiscard]] std::string repr() const override;
-//    std::vector<std::string> qualifiedColumns;
-//
-//};
+#pragma once
+
+#include <string>
+#include <vector>
+#include <utility>
+#include "ASTNodeBase.h"
+
+class AlterAST : public ASTNode {
+public:
+    enum class Action {
+        ADD,
+        DROP,
+        RENAME,
+        MODIFY,
+    };
+
+    AlterAST(Action action, Identifier table, Identifier column, std::string newValue);
+    AlterAST(Action action, Identifier table, Identifier column);
+
+    void performChecks() override;
+
+    [[nodiscard]] const std::string &getQualifiedColumn() const;
+    [[nodiscard]] const std::string &getNewValue() const;
+    [[nodiscard]] const std::string &getTableName() const;
+    [[nodiscard]] Action getAction() const;
+    [[nodiscard]] std::string repr() const override;
+
+    static std::string actionToString(Action action1);
+
+private:
+    std::string tableName;
+    std::string qualifiedColumn;
+    Action action;
+    Identifier table;
+    Identifier column;
+    std::string newValue;
+
+};

@@ -1,7 +1,6 @@
 #include "../DataManager.h"
 #include "DeletePlan.h"
 
-#include <utility>
 
 DeletePlan::DeletePlan(const std::shared_ptr<PlanNodeBase>& source, std::string  tableName)
         : source(source), tableName(std::move(tableName)) {}

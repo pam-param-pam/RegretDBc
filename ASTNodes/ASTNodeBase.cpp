@@ -4,7 +4,6 @@
 #include "../tokenTypes/Identifier.h"
 #include <algorithm>
 
-ASTNode::ASTNode() {}
 
 void ASTNode::setSqlText(const std::string& sql) {
     sql_text = sql;

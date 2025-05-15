@@ -29,7 +29,7 @@ void UpdatePlan::execute() {
         if (shouldUpdate) {
             TypeHints::Row updatedRow = row;
             for (const auto& [column, literal] : assignments) {
-                updatedRow[column] = literal.getValue();
+                updatedRow[column] = literal;
             }
             newData.push_back(std::move(updatedRow));
         } else {

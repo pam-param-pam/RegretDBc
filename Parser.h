@@ -25,25 +25,24 @@ public:
     std::unique_ptr<ASTNode> parse(const std::string& sql_stmt);
 
 private:
-    SelectAST parseSelect();
-    InsertAST parseInsert();
-    UpdateAST parseUpdate();
-    DeleteAST parseDelete();
-    CreateAST parseCreate();
-    DropAST parseDrop();
-//    AlterAST parseAlter();
-
-
-    Token peek();
-    Token advance();
-    Token expect(const std::string& type_or_value);
-
     Tokenizer tokenizer;
     std::vector<Token> tokens;
     size_t pos = 0;
     std::string sql;
     std::map<std::string, std::string> OPERATOR_MAP;
 
+    SelectAST parseSelect();
+    InsertAST parseInsert();
+    UpdateAST parseUpdate();
+    DeleteAST parseDelete();
+    CreateAST parseCreate();
+    DropAST parseDrop();
+    AlterAST parseAlter();
+
+
+    Token peek();
+    Token advance();
+    Token expect(const std::string& type_or_value);
 
     std::vector<Literal> parseValueList();
 
@@ -76,6 +75,5 @@ private:
     Operand parseNot();
 
     Operand parseComparison();
-
 
 };

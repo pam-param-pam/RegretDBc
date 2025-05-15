@@ -8,8 +8,7 @@
 
 class TypeHints {
 public:
-    using Value = std::variant<std::monostate, std::string, int, bool>;
-    using Row = std::unordered_map<std::string, Value>;
+    using Row = std::unordered_map<std::string, Literal>;
     using TableData = std::vector<Row>;
     using ColumnTypeMap = std::unordered_map<std::string, Literal::Type>;
 

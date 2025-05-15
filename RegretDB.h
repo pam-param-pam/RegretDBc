@@ -15,4 +15,5 @@ private:
     Parser parser;
     ExecutionPlanner planner;
 
+    void dumpToSQL(const std::string &filename);
 };

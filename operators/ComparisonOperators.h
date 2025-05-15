@@ -13,10 +13,9 @@
 class ComparisonOperator {
 public:
     using Row = TypeHints::Row;
-    using Value = TypeHints::Value;
 
-    ComparisonOperator(std::string columnName, Literal literal)
-            : columnName(std::move(columnName)), literal(std::move(literal)) {}
+    ComparisonOperator(std::string columnName, const Literal& literal)
+            : columnName(std::move(columnName)), literal(literal) {}
 
     virtual ~ComparisonOperator() = default;
 
@@ -30,9 +29,9 @@ protected:
     std::string columnName;
     Literal literal;
 
-    [[nodiscard]] std::pair<Value, Value> resolveAndUnpackOrThrow(const Row& row) const;
+    [[nodiscard]] std::pair<Literal, Literal> resolveAndUnpackOrThrow(const Row& row) const;
 
-    [[nodiscard]] std::optional<Value> resolve(const Row &row) const;
+    [[nodiscard]] std::optional<Literal> resolve(const Row &row) const;
 
 };
 

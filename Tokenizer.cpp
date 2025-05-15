@@ -1,5 +1,7 @@
 #include "Tokenizer.h"
+#include "fmt/base.h"
 #include <stdexcept>
+#include <iostream>
 
 Tokenizer::Tokenizer() {
     token_specification = {
@@ -14,7 +16,7 @@ Tokenizer::Tokenizer() {
             {"SKIP", R"([ \t\n\r]+)"}, // Skip whitespace
             {"DOT", "\\."},
             {"NUMBER", R"([-]?\b\d+(?:\.\d*)?)"},
-            {"TEXT", "'([^']*)'"}, // Single-quoted string
+            {"TEXT", R"('(?:[^']|'')*')"},
 //            {"BLOB", "b'([0-9A-Fa-f]+)'|x'([0-9A-Fa-f]+)'"}, // BLOB
             {"MISMATCH", "."} // Any other character
     };
@@ -35,10 +37,11 @@ Tokenizer::Tokenizer() {
             "DELETE",
             "CREATE", "TABLE",
             "DROP",
-            "ALTER", "ADD", "RENAME", "MODIFY",
+            "ALTER", "ADD", "RENAME", "MODIFY", "COLUMN",
             "AND", "OR", "IS", "NOT", "FALSE", "TRUE",
-//            "PRIMARY", "FOREIGN", "KEY", "UNIQUE", "DEFAULT", "CASCADE", "RESTRICT",     //no support for constraints atp
-            "TEXT", "NUMBER", "BOOL", "NULL"
+            "TEXT", "NUMBER", "BOOL", "NULL",
+            // "PRIMARY", "FOREIGN", "KEY", "UNIQUE", "DEFAULT", "CASCADE", "RESTRICT",     //no support for constraints atp
+
     };
 }
 
@@ -48,13 +51,26 @@ std::vector<Token> Tokenizer::tokenize(const std::string& sql) {
 
     // Loop over the input SQL string
     while (pos < sql.length()) {
+
         std::smatch match;
-        if (!std::regex_search(sql.begin() + pos, sql.end(), match, tok_regex)) {
+
+        if (!std::regex_search(sql.begin() + pos, sql.end(), match, tok_regex, std::regex_constants::match_continuous)) {
             throw SQLSyntaxError("Illegal character at position " + std::to_string(pos));
         }
 
+        // DEBUG:
+//        std::cout << "DEBUG: matched text = '"
+//                  << match.str(0)
+//                  << "' at offset " << match.position(0)
+//                  << ", len " << match.length(0) << "\n";
+//        for (size_t gi = 1; gi < match.size(); ++gi) {
+//            std::cout << "    group[" << gi << "] = '"
+//                      << match.str(gi)
+//                      << "'  matched=" << match[gi].matched << "\n";
+//        }
+
         // Determine which matched token
-        for (size_t i = 0; i < token_specification.size(); ++i) {
+        for (auto i = 0; i < token_specification.size(); ++i) {
             if (match[i + 1].matched) {
                 std::string token_value = match[i + 1].str();
                 std::string token_type = token_specification[i].first;
@@ -81,6 +97,7 @@ std::vector<Token> Tokenizer::tokenize(const std::string& sql) {
                 break;
             }
         }
+
     }
     return tokens;
 }

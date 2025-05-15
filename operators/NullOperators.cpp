@@ -11,7 +11,7 @@ std::string IsNullCheck::toString() const {
     return (isNullCheck() ? "IS_NULL(" : "IS_NOT_NULL(") + columnName + ")";
 }
 
-IsNullCheck::Value IsNullCheck::resolve(const Row& row) const {
+Literal IsNullCheck::resolve(const Row& row) const {
     auto it = row.find(columnName);
     if (it == row.end()) {
         throw IntegrityError("Unexpected: Column '" + columnName + "' not found in row");
@@ -22,8 +22,7 @@ IsNullCheck::Value IsNullCheck::resolve(const Row& row) const {
 
 std::optional<bool> IsNullCheck::evaluate(const IsNullCheck::Row &row) const {
     auto value = resolve(row);
-    bool isNull = std::holds_alternative<std::monostate>(value);
-    return isNullCheck() ? isNull : !isNull;
+    return isNullCheck() ? value.isNull() : !value.isNull();
 
 }
 

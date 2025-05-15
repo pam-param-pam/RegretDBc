@@ -16,9 +16,6 @@ void CreateAST::performChecks() {
     for (const auto& column : columns) {
         qualifiedColumns.push_back(name + "." + column.value);
     }
-//    fmt::println("Columns: {}\n", fmt::join(columnTypes, " "));
-//    fmt::println("Columns: {}\n", fmt::join(qualifiedColumns, " "));
-
 }
 
 std::string CreateAST::repr() const {

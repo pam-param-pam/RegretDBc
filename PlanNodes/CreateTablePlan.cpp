@@ -6,15 +6,15 @@ CreateTablePlan::CreateTablePlan(std::string name, const std::vector<std::string
 
 void CreateTablePlan::execute() {
     DataManager& dataManager = DataManager::getInstance();
-    TypeHints::ColumnTypeMap col_types;
+    TypeHints::ColumnTypeMap colTypes;
 
 
     for (size_t i = 0; i < columns.size(); ++i) {
-        col_types[columns[i]] = columnTypes[i];
+        colTypes[columns[i]] = columnTypes[i];
     }
 
     dataManager.addTable(name);
-    dataManager.addColumnTypes(name, col_types);
+    dataManager.addColumnTypes(name, colTypes);
 }
 
 TypeHints::TableData CreateTablePlan::getResult() const {
