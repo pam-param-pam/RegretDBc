@@ -44,7 +44,7 @@ Token Parser::expect(const std::string &type_or_value) {
         advance();
         return token;
     } else {
-        throw SQLSyntaxError("Expected '" + type_or_value + "' but found '" + token.value + "'");
+        throw SQLSyntaxError("Expected '" + type_or_value + "' but found '" + token.toString() + "'");
     }
 }
 
@@ -326,7 +326,7 @@ Operand Parser::parseComparison() {
 }
 
 CreateAST Parser::parseCreate() {
-    ///CREATE TABLE <table_name> (<column_name> <data_type>, [, <column_name2> <data_type2> ...])
+    ///CREATE TABLE <table> (<columnName> <dataType> [, <columnName2> <dataType2> ...])
     expect("CREATE");
     expect("TABLE");
     Identifier table = parseTable();
@@ -371,8 +371,7 @@ InsertAST Parser::parseInsert() {
 }
 
 SelectAST Parser::parseSelect() {
-    ///SELECT <columns> FROM <table> [WHERE <expr>] [ORDER BY <column> ASC|DESC]
-
+    ///SELECT *|<columns> FROM <table> [WHERE <condition>] [ORDER BY <column> ASC|DESC]
     expect("SELECT");
 
     std::vector<Identifier> columns;
@@ -440,7 +439,7 @@ UpdateAST Parser::parseUpdate() {
 
 
 DropAST Parser::parseDrop() {
-    ///DROP TABLE <table_name>
+    ///DROP TABLE <table>
     expect("DROP");
     expect("TABLE");
 
@@ -451,10 +450,10 @@ DropAST Parser::parseDrop() {
 
 
 AlterAST Parser::parseAlter() {
-    ///ALTER TABLE <table_name>  [ADD COLUMN <column_name> <data_type>]
-    ///                        | [DROP COLUMN <column_name>]
-    ///                        | [RENAME COLUMN <old_name> TO <new_name>]
-    ///                        | [MODIFY COLUMN <column_name> <new_data_type>
+    ///ALTER TABLE <table>  [ADD COLUMN <columnName> <dataType>]
+    ///                    | [DROP COLUMN <column>]
+    ///                    | [RENAME COLUMN <oldName> TO <newName>]
+    ///                    | [MODIFY COLUMN <column> <newDataType>]
 
     expect("ALTER");
     expect("TABLE");
