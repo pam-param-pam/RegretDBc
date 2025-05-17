@@ -1,4 +1,5 @@
 #include "Exceptions.h"
+#include "fmt/base.h"
 
 /// RegretDBError
 RegretDBError::RegretDBError(const std::string &msg)
@@ -57,8 +58,11 @@ std::string PreProcessorError::getPrettyError(const std::string &sqlStmt) const 
 
         idx += wordLen;
     }
-
-    return message + "\n" + sqlStmt + "\n" + underline;
+    if (underline.find('^') != std::string::npos) {
+        return message + "\n" + sqlStmt + "\n" + underline;
+    } else {
+        return message;
+    }
 }
 
 /// IntegrityError
