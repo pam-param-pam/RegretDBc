@@ -14,7 +14,7 @@ void InsertAST::performChecks() {
         throw PreProcessorError("Number of columns does not match number of values");
     }
     if (columns.size() != columnTypeMap.size()) {
-        throw PreProcessorError("Number of columns does not match number of columns in the actual talbe");
+        throw PreProcessorError("Number of columns does not match number of columns in the actual table");
     }
 
     // Check if the types of values match the expected types for each column

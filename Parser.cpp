@@ -1,20 +1,6 @@
 #include "Parser.h"
+#include "utils.h"
 
-
-bool parse_boolean(const std::string &token) {
-    std::string lower_token = token;
-    std::transform(lower_token.begin(), lower_token.end(), lower_token.begin(),
-                   [](unsigned char c) { return std::tolower(c); });
-
-    if (lower_token == "true") {
-        return true;
-    }
-    if (lower_token == "false") {
-        return false;
-    }
-
-    throw std::invalid_argument("Invalid boolean string: " + token);
-}
 
 Parser::Parser() : pos(0) {}
 
@@ -31,14 +17,14 @@ Token Parser::advance() {
     return peek();
 }
 
-Token Parser::expect(const std::string &type_or_value) {
+Token Parser::expect(const std::string &typeOrValue) {
     Token token = peek();
 
-    if (token.type == type_or_value || token.value == type_or_value) {
+    if (token.type == typeOrValue || token.value == typeOrValue) {
         advance();
         return token;
     } else {
-        throw SQLSyntaxError("Expected '" + type_or_value + "' but found '" + token.toString() + "'");
+        throw SQLSyntaxError("Expected '" + typeOrValue + "' but found: " + token.toString());
     }
 }
 
@@ -99,7 +85,7 @@ Literal Parser::parseLiteral() {
     }
     if (token.type == "BOOLEAN_VALUE") {
         advance();
-        return {Literal::Type::BOOLEAN, parse_boolean(token.value)};
+        return {Literal::Type::BOOLEAN, parseBoolean(token.value)};
     }
     if (token.type == "TEXT_VALUE") {
         advance();
@@ -290,7 +276,7 @@ Condition Parser::parseComparison() {
 
     if (token.type == "BOOLEAN_VALUE") {
         advance();
-        bool value = parse_boolean(token.value);
+        bool value = parseBoolean(token.value);
         return Condition(value);
     }
 

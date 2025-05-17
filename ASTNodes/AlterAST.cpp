@@ -18,7 +18,7 @@ void AlterAST::performChecks() {
 
         const auto &columns = dataManager.getColumnsForTable(tableName);
         if (std::find(columns.begin(), columns.end(), qualifiedColumn) != columns.end()) {
-            throw PreProcessorError("Column: " + qualifiedColumn + " already exists for table: " + qualifiedColumn);
+            throw PreProcessorError("Column: " + qualifiedColumn + " already exists for table: " + tableName, column.value);
         }
     } else if (action == Action::DROP) {
         qualifiedColumn = checkColumn({tableName}, column.value);

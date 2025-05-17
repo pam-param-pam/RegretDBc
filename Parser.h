@@ -40,7 +40,7 @@ private:
 
     Token peek();
     Token advance();
-    Token expect(const std::string& type_or_value);
+    Token expect(const std::string& typeOrValue);
 
     std::vector<Literal> parseValueList();
 

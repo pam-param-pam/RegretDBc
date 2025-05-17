@@ -11,16 +11,16 @@ void ASTNode::verify() {
         performChecks();
     } catch (PreProcessorError &e) {
         if (sqlText.empty()) {
-            throw RegretDBError("sql_text not set in ASTNode");
+            throw RegretDBError("sqlText not set in ASTNode");
         }
-        e.sqlStmt = sqlText;
+        e.setMessage(e.getPrettyError(sqlText));
         throw e;
     }
 }
 
 std::string ASTNode::checkTable(const Identifier &table) {
     if (!DataManager::getInstance().doesTableExist(table.value)) {
-        throw PreProcessorError("Table '" + table.value + "' not found.");
+        throw PreProcessorError("Table '" + table.value + "' not found.", table.value);
     }
     return table.value;
 }
@@ -90,7 +90,7 @@ void ASTNode::checkColumnType(TypeHints::ColumnTypeMap columnTypeMap, const std:
     const Literal::Type &expectedType = columnTypeMap.at(qualifiedColumn);
 
     if (expectedType != valueType && valueType != Literal::Type::NULL_VALUE) {
-        throw PreProcessorError("Type mismatch! Expected: " + Literal::typeToString(expectedType) + ", got: " + Literal::typeToString(valueType));
+        throw PreProcessorError("Type mismatch! Expected: " + Literal::typeToString(expectedType) + ", got: " + Literal::typeToString(valueType), literal.toString());
     }
 }
 

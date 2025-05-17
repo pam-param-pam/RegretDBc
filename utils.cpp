@@ -1,8 +1,22 @@
-#include <iostream>
 #include <algorithm>
-#include "TypeHints.h"
 #include "fmt/base.h"
 #include "DataManager.h"
+#include "exceptions/exceptions.h"
+
+bool parseBoolean(const std::string &token) {
+    std::string lower_token = token;
+    std::transform(lower_token.begin(), lower_token.end(), lower_token.begin(),
+                   [](unsigned char c) { return std::tolower(c); });
+
+    if (lower_token == "true") {
+        return true;
+    }
+    if (lower_token == "false") {
+        return false;
+    }
+
+    throw IntegrityError("Invalid boolean string: " + token);
+}
 
 std::pair<std::string, std::string> splitColumn(const std::string &column) {
     auto dot_pos = column.find('.');

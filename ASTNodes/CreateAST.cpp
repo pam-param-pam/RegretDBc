@@ -10,7 +10,7 @@ void CreateAST::performChecks() {
         throw PreProcessorError("Mismatch between number of columns and column types.");
     }
     if (DataManager::getInstance().doesTableExist(tableName)) {
-        throw PreProcessorError("Table '" + tableName + "' already exists");
+        throw PreProcessorError("Table '" + tableName + "' already exists", tableName);
     }
 
     for (const auto &column: columns) {

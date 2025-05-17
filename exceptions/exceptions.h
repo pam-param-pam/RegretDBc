@@ -9,20 +9,19 @@ class RegretDBError : public std::runtime_error {
 public:
     explicit RegretDBError(const std::string &msg);
 
+    void setMessage(const std::string &msg);
+
+    std::string getMessage();
+
+    const char* what() const noexcept override;
+
 protected:
     std::string message;
-
 };
 
 class SQLSyntaxError : public RegretDBError {
 
 public:
-    [[nodiscard]] const char *what() const noexcept override;
-
-    void setMessage(const std::string &msg);
-
-    std::string getMessage();
-
     explicit SQLSyntaxError(const std::string &msg);
 
     std::string getPrettyError(const std::string &sql, const std::vector<Token> &tokens, int pos, int adjust_pos = 0);
@@ -34,9 +33,13 @@ class PreProcessorError : public RegretDBError {
 public:
     explicit PreProcessorError(const std::string &msg);
 
-    PreProcessorError(const std::string &msg, const std::string &word);
+    PreProcessorError(const std::string &msg, std::string word);
 
-    std::string sqlStmt;
+    std::string getPrettyError(const std::string &stmt) const;
+
+private:
+    std::string word;
+
 };
 
 class IntegrityError : public RegretDBError {

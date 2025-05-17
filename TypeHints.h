@@ -1,7 +1,6 @@
 #pragma once
 
 #include <string>
-#include <variant>
 #include <unordered_map>
 #include <vector>
 #include "tokenTypes/Literal.h"

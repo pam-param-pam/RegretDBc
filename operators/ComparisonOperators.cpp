@@ -35,9 +35,11 @@ EQ::EQ(const std::string &column, const Literal &literal)
         : ComparisonOperator(column, literal) {}
 
 std::optional<bool> EQ::evaluate(const Row &row) const {
+    if (literal.getType() == Literal::Type::NULL_VALUE) {
+        throw IntegrityError("EQ is not allowed for type NULL");
+    }
 
     auto values = resolveAndUnpackOrThrow(row);
-
     const auto &[val, litVal] = values;
 
     if (val.getType() == litVal.getType()) {
@@ -61,9 +63,11 @@ NEQ::NEQ(const std::string &column, const Literal &literal)
         : ComparisonOperator(column, literal) {}
 
 std::optional<bool> NEQ::evaluate(const Row &row) const {
+    if (literal.getType() == Literal::Type::NULL_VALUE) {
+        throw IntegrityError("NEQ is not allowed for type NULL");
+    }
 
     auto values = resolveAndUnpackOrThrow(row);
-
     const auto &[val, litVal] = values;
 
     if (val.getType() == litVal.getType()) {
@@ -87,13 +91,14 @@ LT::LT(const std::string &column, const Literal &literal)
         : ComparisonOperator(column, literal) {}
 
 std::optional<bool> LT::evaluate(const Row &row) const {
-
     if (literal.getType() == Literal::Type::BOOLEAN) {
         throw IntegrityError("LT is not allowed for type BOOLEAN");
     }
+    if (literal.getType() == Literal::Type::NULL_VALUE) {
+        throw IntegrityError("LT is not allowed for type NULL");
+    }
 
     auto values = resolveAndUnpackOrThrow(row);
-
     const auto &[val, litVal] = values;
 
     if (val.getType() == litVal.getType()) {
@@ -120,9 +125,11 @@ std::optional<bool> LTE::evaluate(const Row &row) const {
     if (literal.getType() == Literal::Type::BOOLEAN) {
         throw IntegrityError("LTE is not allowed for type BOOLEAN");
     }
+    if (literal.getType() == Literal::Type::NULL_VALUE) {
+        throw IntegrityError("LTE is not allowed for type NULL");
+    }
 
     auto values = resolveAndUnpackOrThrow(row);
-
     const auto &[val, litVal] = values;
 
     if (val.getType() == litVal.getType()) {
@@ -149,6 +156,9 @@ std::optional<bool> GT::evaluate(const Row &row) const {
     if (literal.getType() == Literal::Type::BOOLEAN) {
         throw IntegrityError("GT is not allowed for type BOOLEAN");
     }
+    if (literal.getType() == Literal::Type::NULL_VALUE) {
+        throw IntegrityError("GT is not allowed for type NULL");
+    }
 
     auto values = resolveAndUnpackOrThrow(row);
 
@@ -168,18 +178,6 @@ std::string GT::toString() const {
     return columnName + " > " + literal.toString();
 }
 
-std::shared_ptr<ComparisonOperator> ComparisonOperator::fromLiteral(const std::string &op, const Identifier &left, const Literal &right) {
-    std::string column = left.value;
-    if (op == "=") return std::make_shared<EQ>(column, right);
-    if (op == "!=") return std::make_shared<NEQ>(column, right);
-    if (op == ">") return std::make_shared<GT>(column, right);
-    if (op == "<") return std::make_shared<LT>(column, right);
-    if (op == ">=") return std::make_shared<GTE>(column, right);
-    if (op == "<=") return std::make_shared<LTE>(column, right);
-
-    throw std::invalid_argument("Unknown comparison operator: " + op);
-}
-
 
 /// ------------ GTE ------------
 
@@ -189,6 +187,9 @@ GTE::GTE(const std::string &column, const Literal &literal)
 std::optional<bool> GTE::evaluate(const Row &row) const {
     if (literal.getType() == Literal::Type::BOOLEAN) {
         throw IntegrityError("GTE is not allowed for type BOOLEAN");
+    }
+    if (literal.getType() == Literal::Type::NULL_VALUE) {
+        throw IntegrityError("GTE is not allowed for type NULL");
     }
 
     auto values = resolveAndUnpackOrThrow(row);
@@ -207,4 +208,18 @@ std::optional<bool> GTE::evaluate(const Row &row) const {
 
 std::string GTE::toString() const {
     return columnName + " >= " + literal.toString();
+}
+
+
+std::shared_ptr<ComparisonOperator> ComparisonOperator::fromLiteral(const std::string &op, const Identifier &left, const Literal &right) {
+    std::string column = left.value;
+
+    if (op == "=") return std::make_shared<EQ>(column, right);
+    if (op == "!=") return std::make_shared<NEQ>(column, right);
+    if (op == ">") return std::make_shared<GT>(column, right);
+    if (op == "<") return std::make_shared<LT>(column, right);
+    if (op == ">=") return std::make_shared<GTE>(column, right);
+    if (op == "<=") return std::make_shared<LTE>(column, right);
+
+    throw IntegrityError("Unknown comparison operator: " + op);
 }

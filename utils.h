@@ -8,6 +8,8 @@
 
 std::pair<std::string, std::string> splitColumn(const std::string &column);
 
+bool parseBoolean(const std::string &token);
+
 void printRow(const TypeHints::Row &row);
 
 void printTable(TypeHints::TableData data);

@@ -20,7 +20,7 @@ void AlterTablePlan::execute() {
             modifyColumn();
             break;
         default:
-            throw std::runtime_error("Unexpected Alter action in plan");
+            throw IntegrityError("Unexpected Alter action in plan");
     }
 }
 
@@ -46,7 +46,7 @@ void AlterTablePlan::modifyColumn() {
 }
 
 TypeHints::TableData AlterTablePlan::getResult() const {
-    throw std::runtime_error("getResult() not supported for AlterPlan");
+    throw IntegrityError("getResult() not supported for AlterPlan");
 }
 
 std::string AlterTablePlan::toString(int level) const {
