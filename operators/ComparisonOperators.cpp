@@ -2,7 +2,6 @@
 #include "ComparisonOperators.h"
 
 
-
 /// ------------ BASE CLASS ------------
 std::optional<Literal> ComparisonOperator::resolve(const Row &row) const {
     auto it = row.find(columnName);
@@ -24,7 +23,8 @@ std::pair<Literal, Literal> ComparisonOperator::resolveAndUnpackOrThrow(const Ro
 
     return {val, literal};
 }
-void ComparisonOperator::visitColumns(const std::function<void(std::string&, const std::optional<Literal>&)>& visitor) {
+
+void ComparisonOperator::visitColumns(const std::function<void(std::string &, const std::optional<Literal> &)> &visitor) {
     visitor(columnName, literal);
 }
 
@@ -113,10 +113,10 @@ std::string LT::toString() const {
 
 /// ------------ LTE ------------
 
-LTE::LTE(const std::string& column, const Literal& literal)
+LTE::LTE(const std::string &column, const Literal &literal)
         : ComparisonOperator(column, literal) {}
 
-std::optional<bool> LTE::evaluate(const Row& row) const {
+std::optional<bool> LTE::evaluate(const Row &row) const {
     if (literal.getType() == Literal::Type::BOOLEAN) {
         throw IntegrityError("LTE is not allowed for type BOOLEAN");
     }
@@ -142,10 +142,10 @@ std::string LTE::toString() const {
 
 /// ------------ GT ------------
 
-GT::GT(const std::string& column, const Literal& literal)
+GT::GT(const std::string &column, const Literal &literal)
         : ComparisonOperator(column, literal) {}
 
-std::optional<bool> GT::evaluate(const Row& row) const {
+std::optional<bool> GT::evaluate(const Row &row) const {
     if (literal.getType() == Literal::Type::BOOLEAN) {
         throw IntegrityError("GT is not allowed for type BOOLEAN");
     }
@@ -167,7 +167,8 @@ std::optional<bool> GT::evaluate(const Row& row) const {
 std::string GT::toString() const {
     return columnName + " > " + literal.toString();
 }
-std::shared_ptr<ComparisonOperator> ComparisonOperator::fromLiteral(const std::string& op, const Identifier& left, const Literal& right) {
+
+std::shared_ptr<ComparisonOperator> ComparisonOperator::fromLiteral(const std::string &op, const Identifier &left, const Literal &right) {
     std::string column = left.value;
     if (op == "=") return std::make_shared<EQ>(column, right);
     if (op == "!=") return std::make_shared<NEQ>(column, right);
@@ -182,10 +183,10 @@ std::shared_ptr<ComparisonOperator> ComparisonOperator::fromLiteral(const std::s
 
 /// ------------ GTE ------------
 
-GTE::GTE(const std::string& column, const Literal& literal)
+GTE::GTE(const std::string &column, const Literal &literal)
         : ComparisonOperator(column, literal) {}
 
-std::optional<bool> GTE::evaluate(const Row& row) const {
+std::optional<bool> GTE::evaluate(const Row &row) const {
     if (literal.getType() == Literal::Type::BOOLEAN) {
         throw IntegrityError("GTE is not allowed for type BOOLEAN");
     }

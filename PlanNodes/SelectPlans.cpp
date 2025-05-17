@@ -2,9 +2,6 @@
 #include "SelectPlans.h"
 #include "../DataManager.h"
 #include "fmt/base.h"
-#include "fmt/ranges.h"
-#include <algorithm>
-#include <utility>
 #include <iomanip>
 
 
@@ -24,7 +21,7 @@ TypeHints::TableData TableScan::getResult() const {
 }
 
 ///---------------- Cross Join ----------------
-CrossJoin::CrossJoin(std::shared_ptr<PlanNodeBase> left, std::shared_ptr<PlanNodeBase> right)
+CrossJoin::CrossJoin(std::unique_ptr<PlanNodeBase> left, std::unique_ptr<PlanNodeBase> right)
         : left(std::move(left)), right(std::move(right)) {}
 
 void CrossJoin::execute() {
@@ -53,14 +50,14 @@ TypeHints::TableData CrossJoin::getResult() const {
 
 ///---------------- Filter ----------------
 
-Filter::Filter(std::shared_ptr<PlanNodeBase> source, Operand condition)
+Filter::Filter(std::unique_ptr<PlanNodeBase> source, Condition condition)
         : source(std::move(source)), condition(std::move(condition)) {}
 
 void Filter::execute() {
     source->execute();
     auto data = source->getResult();
 
-    for (const auto& row : data) {
+    for (const auto &row: data) {
         auto result = condition.evaluate(row);
         if (result.value_or(false)) {
             resultData.push_back(row);
@@ -79,7 +76,7 @@ std::string Filter::toString(int level) const {
 
 ///---------------- Project ----------------
 
-Project::Project(std::shared_ptr<PlanNodeBase> source, const std::vector<std::string>& columns)
+Project::Project(std::unique_ptr<PlanNodeBase> source, const std::vector<std::string> &columns)
         : source(std::move(source)), columns(columns) {}
 
 void Project::execute() {
@@ -87,9 +84,9 @@ void Project::execute() {
     source->execute();
     auto data = source->getResult();
 
-    for (const auto& row : data) {
+    for (const auto &row: data) {
         TypeHints::Row newRow;
-        for (const auto& col : columns) {
+        for (const auto &col: columns) {
             newRow[col] = row.at(col);
         }
         resultData.push_back(newRow);
@@ -118,7 +115,7 @@ std::string Project::toString(int level) const {
 
 ///---------------- Sort ----------------
 
-Sort::Sort(std::shared_ptr<PlanNodeBase> source, const std::vector<std::pair<std::string, bool>>& orderBy)
+Sort::Sort(std::unique_ptr<PlanNodeBase> source, const std::vector<std::pair<std::string, bool>> &orderBy)
         : source(std::move(source)), orderBy(orderBy) {}
 
 void Sort::execute() {
@@ -126,10 +123,10 @@ void Sort::execute() {
     auto data = source->getResult();
 
     // Yea I don't remember how this works, but it works so don't touch it
-    std::sort(data.begin(), data.end(), [&](const TypeHints::Row& a, const TypeHints::Row& b) {
-        for (const auto& [column, isDescending] : orderBy) {
-            const Literal& valA = a.at(column);
-            const Literal& valB = b.at(column);
+    std::sort(data.begin(), data.end(), [&](const TypeHints::Row &a, const TypeHints::Row &b) {
+        for (const auto &[column, isDescending]: orderBy) {
+            const Literal &valA = a.at(column);
+            const Literal &valB = b.at(column);
 
             if (valA == valB) {
                 continue;
@@ -155,7 +152,7 @@ std::string Sort::toString(int level) const {
 
 ///---------------- Visualize ----------------
 
-Visualize::Visualize(std::shared_ptr<PlanNodeBase> source) : source(std::move(source)) {}
+Visualize::Visualize(std::unique_ptr<PlanNodeBase> source) : source(std::move(source)) {}
 
 void Visualize::execute() {
     source->execute();
@@ -182,9 +179,9 @@ void Visualize::visualizeTable() {
         colWidths[i] = headers[i].length();
     }
 
-    for (const auto& row : data) {
+    for (const auto &row: data) {
         for (size_t i = 0; i < headers.size(); ++i) {
-            const auto& val = row.at(headers[i]);
+            const auto &val = row.at(headers[i]);
             std::string str = Literal(val).toString();
             colWidths[i] = std::max(colWidths[i], str.length());
         }
@@ -192,15 +189,15 @@ void Visualize::visualizeTable() {
 
     std::ostringstream buffer;
 
-    auto printDivider = [&]() {
+    auto printDivider = [&buffer, &colWidths]() {
         buffer << "+";
-        for (size_t width : colWidths) {
+        for (size_t width: colWidths) {
             buffer << std::string(width + 2, '-') << "+";
         }
         buffer << "\n";
     };
 
-    auto printRow = [&](const std::vector<std::string>& rowData) {
+    auto printRow = [&buffer, &colWidths](const std::vector<std::string> &rowData) {
         buffer << "| ";
         for (size_t i = 0; i < rowData.size(); ++i) {
             buffer << std::left << std::setw(colWidths[i]) << rowData[i] << " | ";
@@ -212,10 +209,10 @@ void Visualize::visualizeTable() {
     printRow(headers);
     printDivider();
 
-    for (const auto& row : data) {
+    for (const auto &row: data) {
         std::vector<std::string> rowStrings;
         rowStrings.reserve(headers.size());
-        for (const auto& h : headers) {
+        for (const auto &h: headers) {
             rowStrings.push_back(Literal(row.at(h)).toString());
         }
         printRow(rowStrings);

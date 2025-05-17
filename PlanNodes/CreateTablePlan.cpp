@@ -2,10 +2,10 @@
 #include "../DataManager.h"
 
 CreateTablePlan::CreateTablePlan(std::string name, const std::vector<std::string> &columns, const std::vector<Literal::Type> &columnTypes)
-     : name(std::move(name)), columns(columns), columnTypes(columnTypes) {}
+        : name(std::move(name)), columns(columns), columnTypes(columnTypes) {}
 
 void CreateTablePlan::execute() {
-    DataManager& dataManager = DataManager::getInstance();
+    DataManager &dataManager = DataManager::getInstance();
     TypeHints::ColumnTypeMap colTypes;
 
 

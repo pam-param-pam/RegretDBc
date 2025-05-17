@@ -1,7 +1,5 @@
 #include "AlterTablePlan.h"
 #include "fmt/core.h"
-#include <algorithm>
-#include <stdexcept>
 
 AlterTablePlan::AlterTablePlan(AlterAST::Action action, std::string tableName, std::string columnName, std::string newValue)
         : action(action), tableName(std::move(tableName)), columnName(std::move(columnName)), newValue(std::move(newValue)) {}

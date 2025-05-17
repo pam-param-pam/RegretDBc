@@ -7,7 +7,7 @@ void DropAST::performChecks() {
     tableName = checkTable(table);
 }
 
-const std::string& DropAST::getTableName() const {
+const std::string &DropAST::getTableName() const {
     return tableName;
 }
 

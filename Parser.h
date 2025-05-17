@@ -1,7 +1,3 @@
-/*
- * I hate this language so much
- */
-
 #pragma once
 
 #include <vector>
@@ -68,15 +64,15 @@ private:
 
     std::vector<std::pair<Identifier, std::string>> parseOrderBy();
 
-    Operand parseExpression();
+    Condition parseExpression();
 
-    Operand parseOr();
+    Condition parseOr();
 
-    Operand parseAnd();
+    Condition parseAnd();
 
-    Operand parseNot();
+    Condition parseNot();
 
-    Operand parseComparison();
+    Condition parseComparison();
 
     Identifier parseQualifiedColumn();
 

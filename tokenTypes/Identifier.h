@@ -1,8 +1,6 @@
 #pragma once
 
 #include <string>
-#include <iostream>
-
 
 class Identifier {
 public:
@@ -12,7 +10,9 @@ public:
     };
 
     Identifier(Type type, std::string value);
+
     [[nodiscard]] std::string toString() const;
+
     Type type;
     std::string value;
 

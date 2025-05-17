@@ -6,8 +6,6 @@
 #include "Token.h"
 #include "exceptions/exceptions.h"
 
-
-// Tokenizer class that splits SQL strings into tokens
 class Tokenizer {
 private:
     std::vector<std::pair<std::string, std::string>> token_specification;
@@ -16,5 +14,6 @@ private:
 
 public:
     Tokenizer();
-    std::vector<Token> tokenize(const std::string& sql);
+
+    std::vector<Token> tokenize(const std::string &sql);
 };

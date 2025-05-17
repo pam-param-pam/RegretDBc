@@ -1,8 +1,5 @@
 #include <fstream>
-#include <sstream>
-#include <algorithm>
 #include "../DataManager.h"
-#include "DropTablePlan.h"
 #include "LoadPlan.h"
 #include "../utils.h"
 #include "../RegretDB.h"

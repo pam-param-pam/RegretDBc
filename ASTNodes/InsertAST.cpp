@@ -1,14 +1,14 @@
 #include "InsertAST.h"
 
 
-InsertAST::InsertAST(Identifier table, const std::vector<Identifier>& columns, const std::vector<Literal>& values)
+InsertAST::InsertAST(Identifier table, const std::vector<Identifier> &columns, const std::vector<Literal> &values)
         : table(std::move(table)), columns(columns), values(values) {}
 
 void InsertAST::performChecks() {
     tableName = checkTable(table);
-    qualifiedColumns = checkColumns({ tableName }, columns);
+    qualifiedColumns = checkColumns({tableName}, columns);
 
-    const auto& columnTypeMap = DataManager::getInstance().getColumnTypesForTable(tableName);
+    const auto &columnTypeMap = DataManager::getInstance().getColumnTypesForTable(tableName);
 
     if (columns.size() != values.size()) {
         throw PreProcessorError("Number of columns does not match number of values");
@@ -24,11 +24,12 @@ void InsertAST::performChecks() {
     }
 
 }
-const std::string& InsertAST::getTableName() const {
+
+const std::string &InsertAST::getTableName() const {
     return tableName;
 }
 
-const std::vector<std::string>& InsertAST::getQualifiedColumns() const {
+const std::vector<std::string> &InsertAST::getQualifiedColumns() const {
     return qualifiedColumns;
 }
 

@@ -8,13 +8,13 @@
 
 std::pair<std::string, std::string> splitColumn(const std::string &column);
 
-void printRow(const TypeHints::Row& row);
+void printRow(const TypeHints::Row &row);
 
 void printTable(TypeHints::TableData data);
 
 std::string typeToString(Literal::Type type);
 
-void visualizeTableStructure(const std::string& table_name);
+void visualizeTableStructure(const std::string &table_name);
 
 void trim(std::string &s);
 

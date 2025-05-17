@@ -12,9 +12,13 @@
 class PlanNodeBase {
 public:
     virtual ~PlanNodeBase() = default;
+
     virtual void execute() = 0;
+
     [[nodiscard]] virtual std::string toString(int level) const = 0;
+
     [[nodiscard]] virtual TypeHints::TableData getResult() const = 0;
+
 protected:
     TypeHints::TableData resultData;
 };

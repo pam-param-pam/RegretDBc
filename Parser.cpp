@@ -1,10 +1,4 @@
 #include "Parser.h"
-#include "tokenTypes/Identifier.h"
-#include "tokenTypes/Literal.h"
-#include "operators/Operand.h"
-#include "ASTNodes/AlterAST.h"
-#include "ASTNodes/DumpLoadAST.h"
-#include <stdexcept>
 
 
 bool parse_boolean(const std::string &token) {
@@ -102,20 +96,21 @@ Literal Parser::parseLiteral() {
     if (token.type == "NUMBER_VALUE") {
         advance();
         return {Literal::Type::NUMBER, std::stoi(token.value)};
-    } else if (token.type == "BOOLEAN_VALUE") {
-
+    }
+    if (token.type == "BOOLEAN_VALUE") {
         advance();
         return {Literal::Type::BOOLEAN, parse_boolean(token.value)};
-    } else if (token.type == "TEXT_VALUE") {
+    }
+    if (token.type == "TEXT_VALUE") {
         advance();
         return {Literal::Type::TEXT, token.value};
-    } else if (token.type == "NULL") {
+    }
+    if (token.type == "NULL") {
         advance();
         return {Literal::Type::NULL_VALUE, std::monostate{}};
-    } else {
-        throw SQLSyntaxError("Expected literal value, found " + token.toString());
     }
 
+    throw SQLSyntaxError("Expected literal value, found " + token.toString());
 }
 
 Identifier Parser::parseQualifiedColumn() {
@@ -128,6 +123,7 @@ Identifier Parser::parseQualifiedColumn() {
     return {Identifier::Type::COLUMN, identifier};
 
 }
+
 std::vector<Identifier> Parser::parseQualifiedColumns() {
     std::vector<Identifier> ids;
 
@@ -249,43 +245,43 @@ std::vector<std::pair<Identifier, std::string>> Parser::parseOrderBy() {
     return orderings;
 }
 
-Operand Parser::parseExpression() {
+Condition Parser::parseExpression() {
     return parseOr(); // Lowest precedence
 }
 
-Operand Parser::parseOr() {
-    Operand left = parseAnd();
+Condition Parser::parseOr() {
+    Condition left = parseAnd();
     while (peek().type == "OR") {
         advance();
-        Operand right = parseAnd();
-        left = Operand(std::make_shared<OR>(std::make_shared<Operand>(left), std::make_shared<Operand>(right)));
+        Condition right = parseAnd();
+        left = Condition(std::make_shared<OR>(std::make_shared<Condition>(left), std::make_shared<Condition>(right)));
     }
     return left;
 }
 
-Operand Parser::parseAnd() {
-    Operand left = parseNot();
+Condition Parser::parseAnd() {
+    Condition left = parseNot();
     while (peek().type == "AND") {
         advance();
-        Operand right = parseNot();
-        left = Operand(std::make_shared<AND>(std::make_shared<Operand>(left), std::make_shared<Operand>(right)));
+        Condition right = parseNot();
+        left = Condition(std::make_shared<AND>(std::make_shared<Condition>(left), std::make_shared<Condition>(right)));
     }
     return left;
 }
 
-Operand Parser::parseNot() {
+Condition Parser::parseNot() {
     if (peek().type == "NOT") {
         advance();
-        Operand operand = parseNot();
-        return Operand(std::make_shared<NOT>(std::make_shared<Operand>(operand)));
+        Condition operand = parseNot();
+        return Condition(std::make_shared<NOT>(std::make_shared<Condition>(operand)));
     }
     return parseComparison();
 }
 
-Operand Parser::parseComparison() {
+Condition Parser::parseComparison() {
     if (peek().type == "LPAREN") {
         advance();
-        Operand expr = parseExpression();
+        Condition expr = parseExpression();
         expect("RPAREN");
         return expr;
     }
@@ -295,7 +291,7 @@ Operand Parser::parseComparison() {
     if (token.type == "BOOLEAN_VALUE") {
         advance();
         bool value = parse_boolean(token.value);
-        return Operand(value);
+        return Condition(value);
     }
 
     Identifier left = parseQualifiedColumn();
@@ -306,10 +302,10 @@ Operand Parser::parseComparison() {
         if (peek().type == "NOT") {
             advance();
             expect("NULL");
-            return Operand(std::make_shared<ISNOTNULL>(left.value));
+            return Condition(std::make_shared<ISNOTNULL>(left.value));
         } else {
             expect("NULL");
-            return Operand(std::make_shared<ISNULL>(left.value));
+            return Condition(std::make_shared<ISNULL>(left.value));
         }
     }
 
@@ -322,7 +318,7 @@ Operand Parser::parseComparison() {
 
     Literal rightLiteral = parseLiteral();
     auto comp = ComparisonOperator::fromLiteral(op, left, rightLiteral);
-    return Operand(comp);
+    return Condition(comp);
 }
 
 CreateAST Parser::parseCreate() {
@@ -387,7 +383,7 @@ SelectAST Parser::parseSelect() {
 
     std::vector<Identifier> tables = parseTables();
 
-    std::optional<Operand> whereExpr;
+    std::optional<Condition> whereExpr;
     if (peek().type == "WHERE") {
         advance();
         whereExpr = parseExpression();
@@ -409,7 +405,7 @@ DeleteAST Parser::parseDelete() {
 
     Identifier table = parseTable();
 
-    std::optional<Operand> whereExpr;
+    std::optional<Condition> whereExpr;
     if (peek().type == "WHERE") {
         advance();
         whereExpr = parseExpression();
@@ -428,7 +424,7 @@ UpdateAST Parser::parseUpdate() {
 
     std::vector<std::pair<Identifier, Literal>> assignments = parseAssignments();
 
-    std::optional<Operand> whereExpr;
+    std::optional<Condition> whereExpr;
     if (peek().type == "WHERE") {
         advance();
         whereExpr = parseExpression();
@@ -472,30 +468,28 @@ AlterAST Parser::parseAlter() {
 
         return {AlterAST::Action::ADD, table, column, dataType};
 
-    } else if (peek().type == "DROP") {
+    }
+    if (peek().type == "DROP") {
         advance();
         expect("COLUMN");
-
         auto column = parseColumn();
 
         return {AlterAST::Action::DROP, table, column};
 
-    } else if (peek().type == "RENAME") {
+    }
+    if (peek().type == "RENAME") {
         advance();
         expect("COLUMN");
-
         auto column = parseColumn();
-
         std::string newColumnName = expect("IDENTIFIER").value;
 
         return {AlterAST::Action::RENAME, table, column, newColumnName};
 
-    } else if (peek().type == "MODIFY") {
+    }
+    if (peek().type == "MODIFY") {
         advance();
         expect("COLUMN");
-
         auto column = parseColumn();
-
         std::string newType = parseColumnType();
 
         return {AlterAST::Action::MODIFY, table, column, newType};
@@ -508,8 +502,7 @@ DumpLoadAST Parser::parseDumpLoad() {
     DumpLoadAST::Type type;
     if (peek().type == "LOAD") {
         type = DumpLoadAST::Type::LOAD;
-    }
-    else if (peek().type == "DUMP") {
+    } else if (peek().type == "DUMP") {
         type = DumpLoadAST::Type::DUMP;
     } else {
         throw SQLSyntaxError("Expected LOAD or DUMP. Instead got: " + peek().value);
@@ -520,7 +513,8 @@ DumpLoadAST Parser::parseDumpLoad() {
     std::string filePath;
     bool first = true;
 
-    while (peek().type == "IDENTIFIER" || peek().value == "." || peek().value == "/" || peek().value == "\\" || peek().value == "-" || peek().value == "_" || peek().value == ":") {
+    while (peek().type == "IDENTIFIER" || peek().value == "." || peek().value == "/" || peek().value == "\\" || peek().value == "-" || peek().value == "_" ||
+           peek().value == ":") {
         if (!first) {
             filePath += "";
         }

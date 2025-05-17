@@ -1,8 +1,7 @@
 #include "Identifier.h"
+#include "../exceptions/exceptions.h"
 
-#include <utility>
-
-Identifier::Identifier(Type type, std::string  value)
+Identifier::Identifier(Type type, std::string value)
         : type(type), value(std::move(value)) {}
 
 std::string Identifier::toString() const {
@@ -16,6 +15,6 @@ std::string Identifier::typeToString(Type type) {
         case Type::TABLE:
             return "TABLE";
         default:
-            throw std::invalid_argument("Invalid identifier Type enum value");
+            throw IntegrityError("Invalid identifier Type enum value");
     }
 }

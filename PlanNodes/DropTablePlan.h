@@ -7,9 +7,12 @@
 
 class DropTablePlan : public PlanNodeBase {
 public:
-    DropTablePlan(std::string name);
+    explicit DropTablePlan(std::string name);
+
     void execute() override;
+
     [[nodiscard]] std::string toString(int level) const override;
+
     [[nodiscard]] TypeHints::TableData getResult() const override;
 
 private:

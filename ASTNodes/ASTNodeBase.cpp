@@ -1,34 +1,33 @@
 #include "ASTNodeBase.h"
-#include <algorithm>
 #include "../utils.h"
 
 
-void ASTNode::setSqlText(const std::string& sql) {
-    sql_text = sql;
+void ASTNode::setSqlText(const std::string &sql) {
+    sqlText = sql;
 }
 
 void ASTNode::verify() {
     try {
         performChecks();
-    } catch (PreProcessorError& e) {
-        if (sql_text.empty()) {
+    } catch (PreProcessorError &e) {
+        if (sqlText.empty()) {
             throw RegretDBError("sql_text not set in ASTNode");
         }
-        e.sql_stmt = sql_text;
+        e.sqlStmt = sqlText;
         throw e;
     }
 }
 
-std::string ASTNode::checkTable(const Identifier& table) {
+std::string ASTNode::checkTable(const Identifier &table) {
     if (!DataManager::getInstance().doesTableExist(table.value)) {
         throw PreProcessorError("Table '" + table.value + "' not found.");
     }
     return table.value;
 }
 
-std::vector<std::string> ASTNode::checkTables(const std::vector<Identifier>& tables) {
+std::vector<std::string> ASTNode::checkTables(const std::vector<Identifier> &tables) {
     std::vector<std::string> seen;
-    for (const auto& table : tables) {
+    for (const auto &table: tables) {
 
         if (std::find(seen.begin(), seen.end(), table.value) != seen.end()) {
             throw PreProcessorError("Duplicate table '" + table.value + "' found.", table.value);
@@ -42,7 +41,7 @@ std::vector<std::string> ASTNode::checkTables(const std::vector<Identifier>& tab
 }
 
 
-std::string ASTNode::checkColumn(std::vector<std::string> tables, const std::string& column) {
+std::string ASTNode::checkColumn(std::vector<std::string> tables, const std::string &column) {
     auto [table_name, col_name] = splitColumn(column);
     bool flag = false;
 
@@ -69,10 +68,10 @@ std::string ASTNode::checkColumn(std::vector<std::string> tables, const std::str
     return flag ? qualified_col_name : column;
 }
 
-std::vector<std::string> ASTNode::checkColumns(const std::vector<std::string>& tables, const std::vector<Identifier>& columns) {
+std::vector<std::string> ASTNode::checkColumns(const std::vector<std::string> &tables, const std::vector<Identifier> &columns) {
     std::vector<std::string> seen;
 
-    for (const auto& column : columns) {
+    for (const auto &column: columns) {
         auto columnName = column.value;
         if (std::find(seen.begin(), seen.end(), columnName) != seen.end()) {
             throw PreProcessorError("Duplicate column '" + columnName + "' found.", columnName);
@@ -86,22 +85,22 @@ std::vector<std::string> ASTNode::checkColumns(const std::vector<std::string>& t
     return seen;
 }
 
-void ASTNode::checkColumnType(TypeHints::ColumnTypeMap columnTypeMap, const std::string& qualifiedColumn, const Literal& literal) {
-    const Literal::Type& valueType = literal.getType();
-    const Literal::Type& expectedType = columnTypeMap.at(qualifiedColumn);
+void ASTNode::checkColumnType(TypeHints::ColumnTypeMap columnTypeMap, const std::string &qualifiedColumn, const Literal &literal) {
+    const Literal::Type &valueType = literal.getType();
+    const Literal::Type &expectedType = columnTypeMap.at(qualifiedColumn);
 
     if (expectedType != valueType && valueType != Literal::Type::NULL_VALUE) {
         throw PreProcessorError("Type mismatch! Expected: " + Literal::typeToString(expectedType) + ", got: " + Literal::typeToString(valueType));
     }
 }
 
-void ASTNode::checkWhereExpr(const std::vector<std::string>& tableNames, const std::optional<Operand>& whereExpr) {
+void ASTNode::checkWhereExpr(const std::vector<std::string> &tableNames, const std::optional<Condition> &whereExpr) {
     whereExpr->visitColumns([this, &tableNames](std::string &column, const std::optional<Literal> &literal) {
         column = checkColumn(tableNames, column);
 
         if (literal) {
             auto [tableName, colName] = splitColumn(column);
-            const auto& columnTypeMap = DataManager::getInstance().getColumnTypesForTable(tableName);
+            const auto &columnTypeMap = DataManager::getInstance().getColumnTypesForTable(tableName);
             checkColumnType(columnTypeMap, column, *literal);
         }
 

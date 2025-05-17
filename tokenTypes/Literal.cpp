@@ -4,7 +4,7 @@
 Literal::Literal(Type type, Value value)
         : type(type), value(std::move(value)) {}
 
-Literal::Literal(const Value& val) {
+Literal::Literal(const Value &val) {
     if (std::holds_alternative<std::string>(val)) {
         type = Type::TEXT;
         value = std::get<std::string>(val);
@@ -31,7 +31,7 @@ std::string Literal::toString() const {
         case Type::NULL_VALUE:
             return "NULL";
     }
-    throw std::invalid_argument("Invalid literal Type enum value");
+    throw IntegrityError("Invalid literal Type enum value");
 }
 
 Literal::Value Literal::getValue() const {
@@ -49,7 +49,7 @@ std::string Literal::typeToString(Literal::Type type) {
         case Type::NULL_VALUE:
             return "NULL";
     }
-    throw std::invalid_argument("typeToString: Invalid literal type string");
+    throw IntegrityError("typeToString: Invalid literal type string");
 }
 
 Literal::Type Literal::getTypeFromValue(const std::string &tokenType) {
@@ -62,7 +62,7 @@ Literal::Type Literal::getTypeFromValue(const std::string &tokenType) {
     } else if (tokenType == "NULL") {
         return Type::NULL_VALUE;
     } else {
-        throw std::invalid_argument("Invalid literal type string: " + tokenType);
+        throw IntegrityError("Invalid literal type string: " + tokenType);
     }
 }
 
@@ -71,12 +71,14 @@ Literal::Type Literal::getType() const {
 }
 
 bool Literal::isNull() const {
-    return type==Type::NULL_VALUE;
+    return type == Type::NULL_VALUE;
 }
-bool Literal::operator==(const Literal& other) const {
+
+bool Literal::operator==(const Literal &other) const {
     return type == other.type && value == other.value;
 }
-bool Literal::operator<(const Literal& other) const {
+
+bool Literal::operator<(const Literal &other) const {
     if (isNull() && other.isNull()) return false;
     if (isNull()) return false;          // NULL is greater, so this is NOT less
     if (other.isNull()) return true;    // other NULL is greater, so this is less

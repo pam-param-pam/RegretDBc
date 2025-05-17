@@ -1,6 +1,4 @@
-#include <sstream>
 #include "Exceptions.h"
-#include "vector"
 
 /// RegretDBError
 RegretDBError::RegretDBError(const std::string &msg)
@@ -62,9 +60,8 @@ std::string SQLSyntaxError::getPrettyError(const std::string &sql, const std::ve
     }
 
 
-    std::ostringstream oss;
-    oss << sql << "\n";
-    oss << std::string(offset + adjust, ' ');
-    oss << std::string(token_length, '^');
-    return oss.str();
+    std::string result = sql + "\n";
+    result += std::string(offset + adjust, ' ');
+    result += std::string(token_length, '^');
+    return result;
 }

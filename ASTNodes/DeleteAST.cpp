@@ -1,7 +1,7 @@
 #include "DeleteAST.h"
 
 
-DeleteAST::DeleteAST(Identifier  table, std::optional<Operand> whereExpr)
+DeleteAST::DeleteAST(Identifier table, std::optional<Condition> whereExpr)
         : table(std::move(table)), whereExpr(std::move(whereExpr)) {}
 
 void DeleteAST::performChecks() {
@@ -9,12 +9,14 @@ void DeleteAST::performChecks() {
     if (whereExpr.has_value()) checkWhereExpr({tableName}, whereExpr);
 }
 
-const std::string& DeleteAST::getTableName() const {
+const std::string &DeleteAST::getTableName() const {
     return tableName;
 }
-const std::optional<Operand> &DeleteAST::getWhereExpr() const {
+
+const std::optional<Condition> &DeleteAST::getWhereExpr() const {
     return whereExpr;
 }
+
 std::string DeleteAST::repr() const {
     return "DeleteStmt(table=" + table.value + ", where=" + whereExpr->toString() + ")";
 }

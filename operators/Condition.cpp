@@ -1,23 +1,22 @@
-#include "Operand.h"
-#include "NullOperators.h"
+#include "Condition.h"
 
-Operand::Operand(bool value)
+Condition::Condition(bool value)
         : type(Type::Boolean), boolValue(value) {}
 
-Operand::Operand(std::shared_ptr<ComparisonOperator> comparisonOp)
+Condition::Condition(std::shared_ptr<ComparisonOperator> comparisonOp)
         : type(Type::ComparisonOperator), comparisonOp(std::move(comparisonOp)) {}
 
-Operand::Operand(std::shared_ptr<IsNullCheck> nullOp)
+Condition::Condition(std::shared_ptr<IsNullCheck> nullOp)
         : type(Type::NullOperator), nullOp(std::move(nullOp)) {}
 
-Operand::Operand(std::shared_ptr<LogicalOperator> logicalOp)
+Condition::Condition(std::shared_ptr<LogicalOperator> logicalOp)
         : type(Type::LogicalOperator), logicalOp(std::move(logicalOp)) {}
 
-Operand::Type Operand::getType() const {
+Condition::Type Condition::getType() const {
     return type;
 }
 
-std::optional<bool> Operand::evaluate(const TypeHints::Row &row) const {
+std::optional<bool> Condition::evaluate(const TypeHints::Row &row) const {
     switch (type) {
         case Type::Boolean:
             return boolValue;
@@ -28,11 +27,11 @@ std::optional<bool> Operand::evaluate(const TypeHints::Row &row) const {
         case Type::LogicalOperator:
             return logicalOp->evaluate(row);
         default:
-            throw IntegrityError("Unexpected: unable to match value in OPERAND");
+            throw IntegrityError("Unexpected: unable to match value in CONDITION");
     }
 }
 
-std::string Operand::toString() const {
+std::string Condition::toString() const {
     switch (type) {
         case Type::Boolean:
             return boolValue ? "True" : "False";
@@ -43,11 +42,11 @@ std::string Operand::toString() const {
         case Type::LogicalOperator:
             return logicalOp->toString();
         default:
-            throw IntegrityError("Unexpected Operand type: " + std::to_string(static_cast<int>(type)));
+            throw IntegrityError("Unexpected CONDITION type: " + std::to_string(static_cast<int>(type)));
     }
 }
 
-void Operand::visitColumns(const std::function<void(std::string &, const std::optional<Literal> &)> &visitor) const {
+void Condition::visitColumns(const std::function<void(std::string &, const std::optional<Literal> &)> &visitor) const {
     switch (type) {
         case Type::Boolean:
             // No columns to visit in a boolean literal
@@ -62,6 +61,6 @@ void Operand::visitColumns(const std::function<void(std::string &, const std::op
             logicalOp->visitColumns(visitor);
             break;
         default:
-            throw IntegrityError("Unknown operand type in visitColumns.");
+            throw IntegrityError("Unknown CONDITION type in visitColumns.");
     }
 }

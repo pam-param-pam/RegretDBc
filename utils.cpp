@@ -4,18 +4,18 @@
 #include "fmt/base.h"
 #include "DataManager.h"
 
-std::pair<std::string, std::string> splitColumn(const std::string& column) {
+std::pair<std::string, std::string> splitColumn(const std::string &column) {
     auto dot_pos = column.find('.');
     if (dot_pos != std::string::npos) {
-        return { column.substr(0, dot_pos), column.substr(dot_pos + 1) };
+        return {column.substr(0, dot_pos), column.substr(dot_pos + 1)};
     } else {
-        return { "", column };
+        return {"", column};
     }
 }
 
-void printRow(const TypeHints::Row& row) {
+void printRow(const TypeHints::Row &row) {
     std::cout << "{ ";
-    for (const auto& [key, value] : row) {
+    for (const auto &[key, value]: row) {
         std::cout << key << ": " << Literal(value).toString() << ", ";
     }
     std::cout << "}" << std::endl;
@@ -24,39 +24,44 @@ void printRow(const TypeHints::Row& row) {
 void printTable(TypeHints::TableData data) {
 
     for (auto rowIdx = 0; rowIdx < data.size(); ++rowIdx) {
-        const auto& row = data[rowIdx];
+        const auto &row = data[rowIdx];
         fmt::print("Row {}:\n", rowIdx);
 
-        for (const auto& [key, literal] : row) {
+        for (const auto &[key, literal]: row) {
 
             fmt::print("  {} = {}\n", key, literal.toString());
         }
     }
 }
 
-std::string typeToString(Literal::Type type)  {
+std::string typeToString(Literal::Type type) {
     switch (type) {
-        case Literal::Type::NULL_VALUE: return "NULL";
-        case Literal::Type::TEXT: return "TEXT";
-        case Literal::Type::NUMBER: return "NUMBER";
-        case Literal::Type::BOOLEAN: return "BOOLEAN";
-        default: return "UNKNOWN";
+        case Literal::Type::NULL_VALUE:
+            return "NULL";
+        case Literal::Type::TEXT:
+            return "TEXT";
+        case Literal::Type::NUMBER:
+            return "NUMBER";
+        case Literal::Type::BOOLEAN:
+            return "BOOLEAN";
+        default:
+            return "UNKNOWN";
     }
 }
 
-void visualizeTableStructure(const std::string& table_name)  {
-    DataManager& dataManager = DataManager::getInstance();
+void visualizeTableStructure(const std::string &table_name) {
+    DataManager &dataManager = DataManager::getInstance();
     if (!dataManager.doesTableExist(table_name)) {
         fmt::println("Table '{}' does not exist.", table_name);
         return;
     }
 
-    const auto& columnTypesMap = dataManager.getColumnTypesForTable(table_name);
+    const auto &columnTypesMap = dataManager.getColumnTypesForTable(table_name);
 
     fmt::println("Table '{}':", table_name);
     fmt::println("Columns and their types:");
 
-    for (const auto& [columnName, columnType] : columnTypesMap) {
+    for (const auto &[columnName, columnType]: columnTypesMap) {
         std::string typeString = typeToString(columnType);
         fmt::println("  Column: '{}' | Type: '{}'", columnName, typeString);
     }

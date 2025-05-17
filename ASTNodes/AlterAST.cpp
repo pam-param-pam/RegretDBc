@@ -3,7 +3,7 @@
 
 
 AlterAST::AlterAST(Action action, Identifier table, Identifier column, std::string newValue)
-            : table(std::move(table)), action(action), column(std::move(column)), newValue(std::move(newValue)) {}
+        : table(std::move(table)), action(action), column(std::move(column)), newValue(std::move(newValue)) {}
 
 AlterAST::AlterAST(AlterAST::Action action, Identifier table, Identifier column)
         : table(std::move(table)), action(action), column(std::move(column)) {}
@@ -11,12 +11,12 @@ AlterAST::AlterAST(AlterAST::Action action, Identifier table, Identifier column)
 void AlterAST::performChecks() {
     tableName = checkTable(table);
 
-    DataManager& dataManager = DataManager::getInstance();
+    DataManager &dataManager = DataManager::getInstance();
 
     if (action == Action::ADD) {
         qualifiedColumn = tableName + "." + column.value;
 
-        const auto& columns = dataManager.getColumnsForTable(tableName);
+        const auto &columns = dataManager.getColumnsForTable(tableName);
         if (std::find(columns.begin(), columns.end(), qualifiedColumn) != columns.end()) {
             throw PreProcessorError("Column: " + qualifiedColumn + " already exists for table: " + qualifiedColumn);
         }

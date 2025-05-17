@@ -3,7 +3,7 @@
 
 
 CreateAST::CreateAST(std::string table_name, const std::vector<Identifier> &columns, std::vector<Literal::Type> &columnTypes)
-        : tableName(std::move(table_name)), columns(columns), columnTypes(columnTypes){}
+        : tableName(std::move(table_name)), columns(columns), columnTypes(columnTypes) {}
 
 void CreateAST::performChecks() {
     if (columns.size() != columnTypes.size()) {
@@ -13,7 +13,7 @@ void CreateAST::performChecks() {
         throw PreProcessorError("Table '" + tableName + "' already exists");
     }
 
-    for (const auto& column : columns) {
+    for (const auto &column: columns) {
         qualifiedColumns.push_back(tableName + "." + column.value);
     }
 }

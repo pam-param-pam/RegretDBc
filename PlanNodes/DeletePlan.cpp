@@ -2,17 +2,17 @@
 #include "DeletePlan.h"
 
 
-DeletePlan::DeletePlan(const std::shared_ptr<PlanNodeBase>& source, std::string  tableName)
-        : source(source), tableName(std::move(tableName)) {}
+DeletePlan::DeletePlan(std::unique_ptr<PlanNodeBase> source, std::string tableName)
+        : source(std::move(source)), tableName(std::move(tableName)) {}
 
 void DeletePlan::execute() {
     source->execute();
     auto toDelete = source->getResult();
 
-    const auto& originalData = DataManager::getInstance().getTablesData(tableName);
+    const auto &originalData = DataManager::getInstance().getTablesData(tableName);
 
     TypeHints::TableData newData;
-    for (const auto& row : originalData) {
+    for (const auto &row: originalData) {
         if (std::find(toDelete.begin(), toDelete.end(), row) == toDelete.end()) {
             newData.push_back(row);
         }

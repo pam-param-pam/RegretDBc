@@ -4,13 +4,14 @@
 RegretDB::RegretDB()
         : parser(), planner() {}
 
-RegretDB& RegretDB::getInstance() {
+RegretDB &RegretDB::getInstance() {
     static RegretDB instance;
     return instance;
 }
-void RegretDB::executeOrder66(const std::string& sqlString) {
-    std::shared_ptr<ASTNode> statement;
-    std::shared_ptr<PlanNodeBase> plan;
+
+void RegretDB::executeOrder66(const std::string &sqlString) {
+    std::unique_ptr<ASTNode> statement;
+    std::unique_ptr<PlanNodeBase> plan;
 
     statement = parser.parse(sqlString);
     statement->setSqlText(sqlString);

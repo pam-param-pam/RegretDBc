@@ -1,6 +1,5 @@
 #include <fstream>
 #include "../DataManager.h"
-#include "DropTablePlan.h"
 #include "DumpPlan.h"
 #include "../utils.h"
 
@@ -9,32 +8,34 @@ DumpPlan::DumpPlan(std::string filePath)
         : filePath(std::move(filePath)) {}
 
 void DumpPlan::execute() {
-    auto& dm = DataManager::getInstance();
+    auto &dm = DataManager::getInstance();
     std::ofstream out(filePath);
     if (!out.is_open()) {
         throw IntegrityError("Failed to open file for writing: " + filePath);
     }
 
-    for (const auto& tableName : dm.getAllTables()) {
-        const auto& columnTypes = dm.getColumnTypesForTable(tableName);
-        const auto& columnOrder = dm.getColumnsForTable(tableName); // ensures order
-        const auto& rows = dm.getTablesData(tableName);
+    for (const auto &tableName: dm.getAllTables()) {
+        const auto &columnTypes = dm.getColumnTypesForTable(tableName);
+        const auto &columnOrder = dm.getColumnsForTable(tableName);
+
+        const auto &rows = dm.getTablesData(tableName);
 
         // --- CREATE TABLE ---
         out << "CREATE TABLE " << tableName << " (";
-        for (auto i = 0; i < columnOrder.size(); ++i) {
-            const auto& col = columnOrder[i];
-            const auto& colType = columnTypes.at(col);
+        //iterate in reverse order to preserve column order
+        for (int i = columnOrder.size() - 1; i >= 0; --i) {
+            const auto &col = columnOrder[i];
+            const auto &colType = columnTypes.at(col);
             auto [tbName, colName] = splitColumn(col);
 
             out << colName << " " << Literal::typeToString(colType);
-            if (i != columnOrder.size() - 1)
+            if (i != 0)
                 out << ", ";
         }
         out << ");\n";
 
         // --- INSERT INTO ---
-        for (const auto& row : rows) {
+        for (const auto &row: rows) {
             out << "INSERT INTO " << tableName << " (";
             for (auto i = 0; i < columnOrder.size(); ++i) {
                 auto [tbName, colName] = splitColumn(columnOrder[i]);
@@ -46,9 +47,8 @@ void DumpPlan::execute() {
             out << ") VALUES (";
 
             for (auto i = 0; i < columnOrder.size(); ++i) {
-                const auto& col = columnOrder[i];
-//                fmt::println(col);
-                const auto& literal = row.at(col);
+                const auto &col = columnOrder[i];
+                const auto &literal = row.at(col);
                 out << literal.toString();
                 if (i != columnOrder.size() - 1)
                     out << ", ";

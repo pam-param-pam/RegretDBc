@@ -1,20 +1,19 @@
+#pragma once
 
 #include <string>
-#include <vector>
-#include <memory>
-#include <map>
-#include <any>
 #include "../TypeHints.h"
-#include "../operators/Operand.h"
+#include "../operators/Condition.h"
 
 ///---------------- Table Scan ----------------
 
 class TableScan : public PlanNodeBase {
 public:
-    explicit TableScan(std::string  table);
+    explicit TableScan(std::string table);
 
     void execute() override;
+
     [[nodiscard]] std::string toString(int level) const override;
+
     [[nodiscard]] TypeHints::TableData getResult() const override;
 
 private:
@@ -26,15 +25,17 @@ private:
 
 class CrossJoin : public PlanNodeBase {
 public:
-    CrossJoin(std::shared_ptr<PlanNodeBase> left, std::shared_ptr<PlanNodeBase> right);
+    CrossJoin(std::unique_ptr<PlanNodeBase> left, std::unique_ptr<PlanNodeBase> right);
 
     void execute() override;
+
     [[nodiscard]] std::string toString(int level) const override;
+
     [[nodiscard]] TypeHints::TableData getResult() const override;
 
 private:
-    std::shared_ptr<PlanNodeBase> left;
-    std::shared_ptr<PlanNodeBase> right;
+    std::unique_ptr<PlanNodeBase> left;
+    std::unique_ptr<PlanNodeBase> right;
 
 };
 
@@ -42,14 +43,17 @@ private:
 
 class Filter : public PlanNodeBase {
 public:
-    Filter(std::shared_ptr<PlanNodeBase> source, Operand condition);
+    Filter(std::unique_ptr<PlanNodeBase> source, Condition condition);
+
     void execute() override;
+
     [[nodiscard]] std::string toString(int level) const override;
+
     [[nodiscard]] TypeHints::TableData getResult() const override;
 
 private:
-    std::shared_ptr<PlanNodeBase> source;
-    Operand condition;
+    std::unique_ptr<PlanNodeBase> source;
+    Condition condition;
 
 };
 
@@ -58,13 +62,16 @@ private:
 
 class Project : public PlanNodeBase {
 public:
-    Project(std::shared_ptr<PlanNodeBase> source, const std::vector<std::string>& columns);
+    Project(std::unique_ptr<PlanNodeBase> source, const std::vector<std::string> &columns);
+
     void execute() override;
+
     [[nodiscard]] std::string toString(int level) const override;
+
     [[nodiscard]] TypeHints::TableData getResult() const override;
 
 private:
-    std::shared_ptr<PlanNodeBase> source;
+    std::unique_ptr<PlanNodeBase> source;
     std::vector<std::string> columns;
 
 };
@@ -73,13 +80,16 @@ private:
 
 class Sort : public PlanNodeBase {
 public:
-    Sort(std::shared_ptr<PlanNodeBase> source, const std::vector<std::pair<std::string, bool>>& orderBy);
+    Sort(std::unique_ptr<PlanNodeBase> source, const std::vector<std::pair<std::string, bool>> &orderBy);
+
     void execute() override;
+
     [[nodiscard]] std::string toString(int level) const override;
+
     [[nodiscard]] TypeHints::TableData getResult() const override;
 
 private:
-    std::shared_ptr<PlanNodeBase> source;
+    std::unique_ptr<PlanNodeBase> source;
     std::vector<std::pair<std::string, bool>> orderBy;
 
 };
@@ -88,14 +98,18 @@ private:
 
 class Visualize : public PlanNodeBase {
 public:
-    explicit Visualize(std::shared_ptr<PlanNodeBase> source);
+    explicit Visualize(std::unique_ptr<PlanNodeBase> source);
+
     void execute() override;
+
     [[nodiscard]] std::string toString(int level) const override;
+
     [[nodiscard]] TypeHints::TableData getResult() const override;
 
 private:
     void visualizeTable();
-    std::shared_ptr<PlanNodeBase> source;
+
+    std::unique_ptr<PlanNodeBase> source;
     std::vector<std::string> headers;
     TypeHints::TableData data;
 };

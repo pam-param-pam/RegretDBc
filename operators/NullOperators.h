@@ -15,14 +15,17 @@ public:
 
     explicit IsNullCheck(std::string columnName);
 
-    [[nodiscard]] std::optional<bool> evaluate(const Row& row) const;
+    [[nodiscard]] std::optional<bool> evaluate(const Row &row) const;
+
     [[nodiscard]] std::string toString() const;
-    void visitColumns(const std::function<void(std::string&, const std::optional<Literal>&)>& visitor);
+
+    void visitColumns(const std::function<void(std::string &, const std::optional<Literal> &)> &visitor);
 
 protected:
     std::string columnName;
 
-    [[nodiscard]] Literal resolve(const Row& row) const;
+    [[nodiscard]] Literal resolve(const Row &row) const;
+
     [[nodiscard]] virtual bool isNullCheck() const = 0;
 };
 
@@ -31,6 +34,7 @@ protected:
 class ISNULL : public IsNullCheck {
 public:
     explicit ISNULL(std::string columnName);
+
 protected:
     [[nodiscard]] bool isNullCheck() const override;
 };
@@ -40,6 +44,7 @@ protected:
 class ISNOTNULL : public IsNullCheck {
 public:
     explicit ISNOTNULL(std::string columnName);
+
 protected:
     [[nodiscard]] bool isNullCheck() const override;
 };

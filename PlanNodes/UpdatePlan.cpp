@@ -1,26 +1,23 @@
 #include "../DataManager.h"
 #include "UpdatePlan.h"
-#include "fmt/base.h"
-
-#include <utility>
 
 
-UpdatePlan::UpdatePlan(const std::shared_ptr<PlanNodeBase> &source, std::string tableName, const std::vector<std::pair<std::string, Literal>>& assignments)
-       : source(source), tableName(std::move(tableName)), assignments(assignments) {}
+UpdatePlan::UpdatePlan(std::unique_ptr<PlanNodeBase> source, std::string tableName, const std::vector<std::pair<std::string, Literal>> &assignments)
+        : source(std::move(source)), tableName(std::move(tableName)), assignments(assignments) {}
 
 void UpdatePlan::execute() {
     source->execute();
     auto toUpdate = source->getResult();
 
-    const auto& originalData = DataManager::getInstance().getTablesData(tableName);
+    const auto &originalData = DataManager::getInstance().getTablesData(tableName);
 
     TypeHints::TableData newData;
 
     //Speed? What is speed?
-    for (const auto& row : originalData) {
+    for (const auto &row: originalData) {
         bool shouldUpdate = false;
 
-        for (const auto& updateRow : toUpdate) {
+        for (const auto &updateRow: toUpdate) {
             if (row == updateRow) {
                 shouldUpdate = true;
                 break;
@@ -28,7 +25,7 @@ void UpdatePlan::execute() {
         }
         if (shouldUpdate) {
             TypeHints::Row updatedRow = row;
-            for (const auto& [column, literal] : assignments) {
+            for (const auto &[column, literal]: assignments) {
                 updatedRow[column] = literal;
             }
             newData.push_back(std::move(updatedRow));
@@ -54,7 +51,7 @@ std::string UpdatePlan::toString(int level) const {
 
     result += indent + "Assignments=[";
     for (size_t i = 0; i < assignments.size(); ++i) {
-        const auto& [column, literal] = assignments[i];
+        const auto &[column, literal] = assignments[i];
         result += column + "=" + literal.toString();
         if (i < assignments.size() - 1) {
             result += ", ";

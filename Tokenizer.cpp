@@ -1,29 +1,27 @@
 #include "Tokenizer.h"
-#include "fmt/base.h"
-#include <stdexcept>
-#include <iostream>
+
 
 Tokenizer::Tokenizer() {
     token_specification = {
             {"BOOLEAN_VALUE", R"(\b[Tt][Rr][Uu][Ee]\b|\b[Ff][Aa][Ll][Ss][Ee]\b)"}, // This must be before identifiers
-            {"IDENTIFIER", "[A-Za-z_][A-Za-z_0-9]*"},
-            {"OP", "<=|>=|!=|=|<|>"},
-            {"STAR", "\\*"},
-            {"COMMA", ","},
-            {"LPAREN", "\\("},
-            {"RPAREN", "\\)"},
-            {"SEMI", ";"},
-            {"SKIP", R"([ \t\n\r]+)"}, // Skip whitespace
-            {"DOT", "\\."},
-            {"NUMBER_VALUE", R"([-]?\b\d+(?:\.\d*)?)"},
-            {"TEXT_VALUE", R"('(?:[^']|'')*')"},
+            {"IDENTIFIER",    "[A-Za-z_][A-Za-z_0-9]*"},
+            {"OP",            "<=|>=|!=|=|<|>"},
+            {"STAR",          "\\*"},
+            {"COMMA",         ","},
+            {"LPAREN",        "\\("},
+            {"RPAREN",        "\\)"},
+            {"SEMI",          ";"},
+            {"SKIP",          R"([ \t\n\r]+)"}, // Skip whitespace
+            {"DOT",           "\\."},
+            {"NUMBER_VALUE",  R"([-]?\b\d+(?:\.\d*)?)"},
+            {"TEXT_VALUE",    R"('(?:[^']|'')*')"},
 //            {"BLOB", "b'([0-9A-Fa-f]+)'|x'([0-9A-Fa-f]+)'"}, // BLOB
-            {"MISMATCH", "."} // Any other character
+            {"MISMATCH",      "."} // Any other character
     };
 
     // Build the combined regex pattern
     std::string combined_pattern;
-    for (const auto& spec : token_specification) {
+    for (const auto &spec: token_specification) {
         if (!combined_pattern.empty()) combined_pattern += "|";
         combined_pattern += "(" + spec.second + ")";
     }
@@ -46,11 +44,10 @@ Tokenizer::Tokenizer() {
     };
 }
 
-std::vector<Token> Tokenizer::tokenize(const std::string& sql) {
+std::vector<Token> Tokenizer::tokenize(const std::string &sql) {
     std::vector<Token> tokens;
     int pos = 0;
 
-    // Loop over the input SQL string
     while (pos < sql.length()) {
 
         std::smatch match;
@@ -66,11 +63,11 @@ std::vector<Token> Tokenizer::tokenize(const std::string& sql) {
                 std::string token_type = token_specification[i].first;
 
                 if (token_type == "TEXT") {
-                    token_value = token_value.substr(1, token_value.length() - 2); // Remove quotes
+                    token_value = token_value.substr(1, token_value.length() - 2);
                 } else if (token_type == "IDENTIFIER") {
                     // Check if it's a keyword
                     std::string upper_val = token_value;
-                    for (auto& ch : upper_val) ch = std::toupper(ch);
+                    for (auto &ch: upper_val) ch = std::toupper(ch);
                     if (std::find(keywords.begin(), keywords.end(), upper_val) != keywords.end()) {
                         token_type = upper_val;
                     }

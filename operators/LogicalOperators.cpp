@@ -1,9 +1,9 @@
 #include "LogicalOperators.h"
 
-AND::AND(std::shared_ptr<Operand> left, std::shared_ptr<Operand> right)
+AND::AND(std::shared_ptr<Condition> left, std::shared_ptr<Condition> right)
         : leftOperand(std::move(left)), rightOperand(std::move(right)) {}
 
-std::optional<bool> AND::evaluate(const TypeHints::Row& row) const {
+std::optional<bool> AND::evaluate(const TypeHints::Row &row) const {
     auto leftEval = leftOperand->evaluate(row);
     auto rightEval = rightOperand->evaluate(row);
 
@@ -18,16 +18,17 @@ void AND::visitColumns(const std::function<void(std::string &, const std::option
     leftOperand->visitColumns(visitor);
     rightOperand->visitColumns(visitor);
 }
+
 std::string AND::toString() const {
     return "AND(" + leftOperand->toString() + ", " + rightOperand->toString() + ")";
 }
 
 
 /// OR
-OR::OR(std::shared_ptr<Operand> left, std::shared_ptr<Operand> right)
+OR::OR(std::shared_ptr<Condition> left, std::shared_ptr<Condition> right)
         : leftOperand(std::move(left)), rightOperand(std::move(right)) {}
 
-std::optional<bool> OR::evaluate(const TypeHints::Row& row) const {
+std::optional<bool> OR::evaluate(const TypeHints::Row &row) const {
     auto leftEval = leftOperand->evaluate(row);
     auto rightEval = rightOperand->evaluate(row);
 
@@ -47,10 +48,10 @@ std::string OR::toString() const {
 }
 
 /// NOT
-NOT::NOT(std::shared_ptr<Operand> operand)
+NOT::NOT(std::shared_ptr<Condition> operand)
         : operand(std::move(operand)) {}
 
-std::optional<bool> NOT::evaluate(const TypeHints::Row& row) const {
+std::optional<bool> NOT::evaluate(const TypeHints::Row &row) const {
     auto operandEval = operand->evaluate(row);
 
     if (operandEval.has_value()) {

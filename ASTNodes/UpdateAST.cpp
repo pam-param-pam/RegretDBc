@@ -1,8 +1,7 @@
 #include "UpdateAST.h"
 #include "fmt/format.h"
-#include <sstream>
 
-UpdateAST::UpdateAST(Identifier table, const std::vector<std::pair<Identifier, Literal>> &assignments, std::optional<Operand> whereExpr)
+UpdateAST::UpdateAST(Identifier table, const std::vector<std::pair<Identifier, Literal>> &assignments, std::optional<Condition> whereExpr)
         : table(std::move(table)), assignments(assignments), whereExpr(std::move(whereExpr)) {}
 
 void UpdateAST::performChecks() {
@@ -10,9 +9,9 @@ void UpdateAST::performChecks() {
 
     if (whereExpr.has_value()) checkWhereExpr({tableName}, whereExpr);
 
-    const auto& colTypesMap = DataManager::getInstance().getColumnTypesForTable(tableName);
+    const auto &colTypesMap = DataManager::getInstance().getColumnTypesForTable(tableName);
 
-    for (const auto& [col, literal] : assignments) {
+    for (const auto &[col, literal]: assignments) {
         auto qualifiedColumn = checkColumn({tableName}, col.value);
         checkColumnType(colTypesMap, qualifiedColumn, literal);
         qualifiedAssignments.emplace_back(qualifiedColumn, literal);
@@ -40,6 +39,6 @@ std::string UpdateAST::repr() const {
                        whereExpr ? whereExpr->toString() : "None");
 }
 
-const std::optional<Operand> &UpdateAST::getWhereExpr() const {
+const std::optional<Condition> &UpdateAST::getWhereExpr() const {
     return whereExpr;
 }

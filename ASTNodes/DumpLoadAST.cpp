@@ -1,9 +1,8 @@
-#include "DropAST.h"
 #include "DumpLoadAST.h"
 #include <filesystem>
 
 DumpLoadAST::DumpLoadAST(DumpLoadAST::Type type, std::string filePath)
-    : type(type), filePath(std::move(filePath)) {}
+        : type(type), filePath(std::move(filePath)) {}
 
 void DumpLoadAST::performChecks() {
     if (type == Type::LOAD) {
@@ -19,10 +18,11 @@ void DumpLoadAST::performChecks() {
     }
 }
 
-const DumpLoadAST::Type& DumpLoadAST::getType() const {
+const DumpLoadAST::Type &DumpLoadAST::getType() const {
     return type;
 }
-const std::string& DumpLoadAST::getFilePath() const {
+
+const std::string &DumpLoadAST::getFilePath() const {
     return filePath;
 }
 

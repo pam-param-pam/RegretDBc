@@ -5,7 +5,7 @@ DropTablePlan::DropTablePlan(std::string name)
         : name(std::move(name)) {}
 
 void DropTablePlan::execute() {
-    DataManager& dataManager = DataManager::getInstance();
+    DataManager &dataManager = DataManager::getInstance();
     dataManager.dropTable(name);
 }
 
